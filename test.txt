@@ -1,2 +1,0 @@
-
-The GitHub Windows application crashes while trying to comprehend the Solr 4.6.1 source tree. Can we commit a single file?
