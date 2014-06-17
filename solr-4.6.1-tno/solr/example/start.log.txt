@@ -1,0 +1,300 @@
+config=org/eclipse/jetty/start/start.config
+F ${path}.path                                     property path
+F ${lib}/**                                        exists ${lib}
+T jetty.home=.                                     ! exists $(jetty.home)/start.jar 
+  jetty.home=.
+F jetty.home=..                                    ! exists $(jetty.home)/start.jar 
+F jetty.home=jetty-distribution/src/main/resources     ! exists $(jetty.home)/start.jar 
+F jetty.home=../jetty-distribution/src/main/resources  ! exists $(jetty.home)/start.jar 
+F jetty.home=.                                     ! exists $(jetty.home)/start.jar
+T jetty.home/=$(jetty.home)                        exists $(jetty.home)/start.jar
+  jetty.home/=.==C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example
+T org.eclipse.jetty.xml.XmlConfiguration.class
+  CLASS=org.eclipse.jetty.xml.XmlConfiguration
+F ${start.class}.class                             property start.class
+T $(jetty.home)/etc/jetty.xml                      nargs == 0
+  ARGS+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\etc\jetty.xml
+F ./jetty-server/src/main/config/etc/jetty.xml     nargs == 0 AND ! exists $(jetty.home)/etc/jetty.xml
+T OPTIONS~=default,*                               ! property OPTIONS
+  OPTIONS~=default,*
+T $(jetty.home)/resources/
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\resources
+ClassNotFoundException (parent class loader): org.eclipse.jetty.util.StringUtil
+ClassNotFoundException (section class loader: *): org.eclipse.jetty.util.StringUtil
+T $(jetty.home)/lib/jetty-util-$(version).jar                                             ! available org.eclipse.jetty.util.StringUtil
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-util-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.io.Buffer
+ClassNotFoundException (section class loader: *): org.eclipse.jetty.io.Buffer
+T $(jetty.home)/lib/jetty-io-$(version).jar                                               ! available org.eclipse.jetty.io.Buffer
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-io-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.xml.XmlParser
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.xml.XmlParser
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.xml.XmlParser
+ClassNotFoundException (section class loader: xml): org.eclipse.jetty.xml.XmlParser
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.xml.XmlParser
+T $(jetty.home)/lib/jetty-xml-$(version).jar                                              ! available org.eclipse.jetty.xml.XmlParser
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-xml-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): javax.servlet.ServletContext
+ClassNotFoundException (section class loader: Server): javax.servlet.ServletContext
+ClassNotFoundException (section class loader: All): javax.servlet.ServletContext
+ClassNotFoundException (section class loader: server): javax.servlet.ServletContext
+ClassNotFoundException (section class loader: default): javax.servlet.ServletContext
+T $(jetty.home)/lib/servlet-api-3.0.jar                                                   ! available javax.servlet.ServletContext
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\servlet-api-3.0.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.http.HttpParser
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.http.HttpParser
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.http.HttpParser
+ClassNotFoundException (section class loader: server): org.eclipse.jetty.http.HttpParser
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.http.HttpParser
+T $(jetty.home)/lib/jetty-http-$(version).jar                                             ! available org.eclipse.jetty.http.HttpParser
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-http-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.continuation.Continuation
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.continuation.Continuation
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.continuation.Continuation
+ClassNotFoundException (section class loader: server): org.eclipse.jetty.continuation.Continuation
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.continuation.Continuation
+T $(jetty.home)/lib/jetty-continuation-$(version).jar                                     ! available org.eclipse.jetty.continuation.Continuation
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-continuation-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.server.Server
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.server.Server
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.server.Server
+ClassNotFoundException (section class loader: server): org.eclipse.jetty.server.Server
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.server.Server
+T $(jetty.home)/lib/jetty-server-$(version).jar                                           ! available org.eclipse.jetty.server.Server
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-server-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.security.LoginService
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.security.LoginService
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.security.LoginService
+ClassNotFoundException (section class loader: security): org.eclipse.jetty.security.LoginService
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.security.LoginService
+T $(jetty.home)/lib/jetty-security-$(version).jar                                         ! available org.eclipse.jetty.security.LoginService
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-security-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): javax.servlet.ServletContext
+F $(jetty.home)/lib/servlet-api-3.0.jar                                                   ! available javax.servlet.ServletContext
+ClassNotFoundException (parent class loader): org.eclipse.jetty.servlet.ServletHandler
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.servlet.ServletHandler
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.servlet.ServletHandler
+ClassNotFoundException (section class loader: servlet): org.eclipse.jetty.servlet.ServletHandler
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.servlet.ServletHandler
+T $(jetty.home)/lib/jetty-servlet-$(version).jar                                          ! available org.eclipse.jetty.servlet.ServletHandler
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-servlet-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.webapp.WebAppContext
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.webapp.WebAppContext
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.webapp.WebAppContext
+ClassNotFoundException (section class loader: webapp): org.eclipse.jetty.webapp.WebAppContext
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.webapp.WebAppContext
+T $(jetty.home)/lib/jetty-webapp-$(version).jar                                           ! available org.eclipse.jetty.webapp.WebAppContext
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-webapp-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.deploy.ContextDeployer
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.deploy.ContextDeployer
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.deploy.ContextDeployer
+ClassNotFoundException (section class loader: deploy): org.eclipse.jetty.deploy.ContextDeployer
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.deploy.ContextDeployer
+T $(jetty.home)/lib/jetty-deploy-$(version).jar                                           ! available org.eclipse.jetty.deploy.ContextDeployer
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-deploy-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.servlets.WelcomeFilter
+ClassNotFoundException (section class loader: Server): org.eclipse.jetty.servlets.WelcomeFilter
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.servlets.WelcomeFilter
+ClassNotFoundException (section class loader: servlets): org.eclipse.jetty.servlets.WelcomeFilter
+ClassNotFoundException (section class loader: default): org.eclipse.jetty.servlets.WelcomeFilter
+T $(jetty.home)/lib/jetty-servlets-$(version).jar                                         ! available org.eclipse.jetty.servlets.WelcomeFilter
+ClassNotFoundException (parent class loader): org.eclipse.jetty.rewrite.handler.RewriteHandler
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.rewrite.handler.RewriteHandler
+ClassNotFoundException (section class loader: rewrite): org.eclipse.jetty.rewrite.handler.RewriteHandler
+T $(jetty.home)/lib/jetty-rewrite-$(version).jar                                          ! available org.eclipse.jetty.rewrite.handler.RewriteHandler
+ClassNotFoundException (parent class loader): org.eclipse.jetty.jmx.MBeanContainer
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.jmx.MBeanContainer
+ClassNotFoundException (section class loader: jmx): org.eclipse.jetty.jmx.MBeanContainer
+T $(jetty.home)/lib/jetty-jmx-$(version).jar                                              ! available org.eclipse.jetty.jmx.MBeanContainer
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-jmx-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.ajp.Ajp13Connection
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.ajp.Ajp13Connection
+ClassNotFoundException (section class loader: ajp): org.eclipse.jetty.ajp.Ajp13Connection
+T $(jetty.home)/lib/jetty-ajp-$(version).jar                                              ! available org.eclipse.jetty.ajp.Ajp13Connection      
+ClassNotFoundException (parent class loader): org.eclipse.jetty.jndi.ContextFactory
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.jndi.ContextFactory
+ClassNotFoundException (section class loader: plus): org.eclipse.jetty.jndi.ContextFactory
+ClassNotFoundException (section class loader: jndi): org.eclipse.jetty.jndi.ContextFactory
+T $(jetty.home)/lib/jetty-jndi-${version}.jar                                             ! available org.eclipse.jetty.jndi.ContextFactory
+ClassNotFoundException (parent class loader): org.eclipse.jetty.plus.jndi.NamingEntry
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.plus.jndi.NamingEntry
+ClassNotFoundException (section class loader: plus): org.eclipse.jetty.plus.jndi.NamingEntry
+ClassNotFoundException (section class loader: jndi): org.eclipse.jetty.plus.jndi.NamingEntry
+T $(jetty.home)/lib/jetty-plus-${version}.jar                                             ! available org.eclipse.jetty.plus.jndi.NamingEntry
+F $(jetty.home)/lib/jndi/**                                                               exists $(jetty.home)/lib/jndi 
+ClassNotFoundException (parent class loader): org.eclipse.jetty.annotations.AnnotationParser
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.annotations.AnnotationParser
+ClassNotFoundException (section class loader: annotations): org.eclipse.jetty.annotations.AnnotationParser
+T $(jetty.home)/lib/jetty-annotations-$(version).jar                                      ! available org.eclipse.jetty.annotations.AnnotationParser
+F $(jetty.home)/lib/annotations/**                                                        exists $(jetty.home)/lib/annotations 
+ClassNotFoundException (parent class loader): org.eclipse.jetty.setuid.SetUID
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.setuid.SetUID
+ClassNotFoundException (section class loader: setuid): org.eclipse.jetty.setuid.SetUID
+T $(jetty.home)/lib/jetty-setuid-$(version).jar                                           ! available org.eclipse.jetty.setuid.SetUID
+T $(jetty.home)/lib/setuid/**                                                       
+ClassNotFoundException (parent class loader): org.eclipse.jetty.policy.JettyPolicy
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.policy.JettyPolicy
+ClassNotFoundException (section class loader: policy): org.eclipse.jetty.policy.JettyPolicy
+T $(jetty.home)/lib/jetty-policy-$(version).jar                                           ! available org.eclipse.jetty.policy.JettyPolicy
+ClassNotFoundException (parent class loader): org.eclipse.jetty.http.HttpParser
+F $(jetty.home)/lib/jetty-http-$(version).jar                                             ! available org.eclipse.jetty.http.HttpParser
+ClassNotFoundException (parent class loader): org.eclipse.jetty.client.HttpClient
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.client.HttpClient
+ClassNotFoundException (section class loader: Client): org.eclipse.jetty.client.HttpClient
+ClassNotFoundException (section class loader: client): org.eclipse.jetty.client.HttpClient
+T $(jetty.home)/lib/jetty-client-$(version).jar                                           ! available org.eclipse.jetty.client.HttpClient
+ClassNotFoundException (parent class loader): org.eclipse.jetty.http.HttpParser
+ClassNotFoundException (section class loader: Client): org.eclipse.jetty.http.HttpParser
+T $(jetty.home)/lib/jetty-http-$(version).jar                                             ! available org.eclipse.jetty.http.HttpParser
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-http-8.1.10.v20130312.jar
+ClassNotFoundException (parent class loader): org.eclipse.jetty.websocket.WebSocket
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.websocket.WebSocket
+ClassNotFoundException (section class loader: websocket): org.eclipse.jetty.websocket.WebSocket
+T $(jetty.home)/lib/jetty-websocket-$(version).jar                                        ! available org.eclipse.jetty.websocket.WebSocket
+ClassNotFoundException (parent class loader): org.eclipse.jetty.overlay.OverlayedAppProvider
+ClassNotFoundException (section class loader: All): org.eclipse.jetty.overlay.OverlayedAppProvider
+ClassNotFoundException (section class loader: overlay): org.eclipse.jetty.overlay.OverlayedAppProvider
+ClassNotFoundException (section class loader: overlays): org.eclipse.jetty.overlay.OverlayedAppProvider
+T $(jetty.home)/lib/jetty-overlay-deployer-$(version).jar                                 ! available org.eclipse.jetty.overlay.OverlayedAppProvider
+T $(jetty.home)/lib/ext/**
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jcl-over-slf4j-1.6.6.jar
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jul-to-slf4j-1.6.6.jar
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\log4j-1.2.16.jar
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-api-1.6.6.jar
+  CLASSPATH+=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-log4j12-1.6.6.jar
+dynamic: C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib
+dynamic: [All, ext]
+  !C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jcl-over-slf4j-1.6.6.jar
+  !C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jul-to-slf4j-1.6.6.jar
+  !C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\log4j-1.2.16.jar
+  !C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-api-1.6.6.jar
+  !C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-log4j12-1.6.6.jar
+java.class.path=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\resources;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-xml-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\servlet-api-3.0.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-http-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-continuation-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-server-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-security-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-servlet-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-webapp-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-deploy-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jcl-over-slf4j-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jul-to-slf4j-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\log4j-1.2.16.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-api-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-log4j12-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-util-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-io-8.1.10.v20130312.jar
+jetty.home=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example
+java.home=C:\Program Files\Java\jre6
+java.io.tmpdir=C:\cygwin64\tmp\
+java.class.path=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\resources;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-xml-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\servlet-api-3.0.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-http-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-continuation-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-server-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-security-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-servlet-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-webapp-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-deploy-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jcl-over-slf4j-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jul-to-slf4j-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\log4j-1.2.16.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-api-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-log4j12-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-util-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-io-8.1.10.v20130312.jar
+classloader=startJarLoader@5f7a8a02
+classloader.parent=sun.misc.Launcher$AppClassLoader@3326b249
+properties={java.runtime.name=Java(TM) SE Runtime Environment, sun.boot.library.path=C:\Program Files\Java\jre6\bin, java.vm.version=20.45-b01, java.vm.vendor=Sun Microsystems Inc., java.vendor.url=http://java.sun.com/, path.separator=;, java.vm.name=Java HotSpot(TM) 64-Bit Server VM, file.encoding.pkg=sun.io, user.country=US, sun.java.launcher=SUN_STANDARD, sun.os.patch.level=, java.vm.specification.name=Java Virtual Machine Specification, user.dir=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example, java.runtime.version=1.6.0_45-b06, java.awt.graphicsenv=sun.awt.Win32GraphicsEnvironment, java.endorsed.dirs=C:\Program Files\Java\jre6\lib\endorsed, os.arch=amd64, java.io.tmpdir=C:\cygwin64\tmp\, line.separator=
+, java.vm.specification.vendor=Sun Microsystems Inc., user.variant=, os.name=Windows 8, sun.jnu.encoding=Cp1252, java.library.path=C:\windows\system32;C:\windows\Sun\Java\bin;C:\windows\system32;C:\windows;C:\cygwin64\usr\local\bin;C:\cygwin64\bin;C:\Program Files\Microsoft MPI\Bin;C:\Program Files\Microsoft HPC Pack 2012\Bin;C:\Program Files\Common Files\Microsoft Shared\Microsoft Online Services;C:\Program Files (x86)\Common Files\Microsoft Shared\Microsoft Online Services;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0;C:\Program Files (x86)\Microsoft ASP.NET\ASP.NET Web Pages\v1.0;C:\Program Files\Microsoft SQL Server\110\Tools\Binn;C:\Program Files (x86)\Windows Kits\8.1\Windows Performance Toolkit;C:\Program Files\Microsoft\Web Platform Installer;C:\Program Files\Java\jdk1.6.0_45\bin;C:\Users\rama\Documents\TNO\apache-ant-1.8.2\bin;C:\Program Files (x86)\LINQPad4;., java.specification.name=Java Platform API Specification, java.class.version=50.0, jetty.home=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example, sun.management.compiler=HotSpot 64-Bit Tiered Compilers, os.version=6.2, user.home=C:\Users\rama, user.timezone=America/Los_Angeles, DEBUG=true, java.awt.printerjob=sun.awt.windows.WPrinterJob, file.encoding=Cp1252, java.specification.version=1.6, java.class.path=C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\resources;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-xml-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\servlet-api-3.0.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-http-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-continuation-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-server-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-security-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-servlet-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-webapp-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-deploy-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jcl-over-slf4j-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\jul-to-slf4j-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\log4j-1.2.16.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-api-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\ext\slf4j-log4j12-1.6.6.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-util-8.1.10.v20130312.jar;C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\lib\jetty-io-8.1.10.v20130312.jar, user.name=rama, java.vm.specification.version=1.0, sun.java.command=start.jar DEBUG=true, java.home=C:\Program Files\Java\jre6, sun.arch.data.model=64, org.eclipse.jetty.util.log.stderr.DEBUG=true, user.language=en, java.specification.vendor=Sun Microsystems Inc., awt.toolkit=sun.awt.windows.WToolkit, java.vm.info=mixed mode, java.version=1.6.0_45, java.ext.dirs=C:\Program Files\Java\jre6\lib\ext;C:\windows\Sun\Java\lib\ext, sun.boot.class.path=C:\Program Files\Java\jre6\lib\resources.jar;C:\Program Files\Java\jre6\lib\rt.jar;C:\Program Files\Java\jre6\lib\sunrsasign.jar;C:\Program Files\Java\jre6\lib\jsse.jar;C:\Program Files\Java\jre6\lib\jce.jar;C:\Program Files\Java\jre6\lib\charsets.jar;C:\Program Files\Java\jre6\lib\modules\jdk.boot.jar;C:\Program Files\Java\jre6\classes, java.vendor=Sun Microsystems Inc., file.separator=\, java.vendor.url.bug=http://java.sun.com/cgi-bin/bugreport.cgi, sun.io.unicode.encoding=UnicodeLittle, sun.cpu.endian=little, org.eclipse.jetty.start.DEBUG=true, OPTIONS=default,*, sun.desktop=windows, sun.cpu.isalist=amd64}
+main.class=org.eclipse.jetty.xml.XmlConfiguration
+org.eclipse.jetty.xml.XmlConfiguration 8.1.10.v20130312
+0    [main] INFO  org.eclipse.jetty.server.Server  – jetty-8.1.10.v20130312
+21   [main] INFO  org.eclipse.jetty.deploy.providers.ScanningAppProvider  – Deployment monitor C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\contexts at interval 0
+28   [main] INFO  org.eclipse.jetty.deploy.DeploymentManager  – Deployable added: C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example\contexts\solr-jetty-context.xml
+78   [main] WARN  org.eclipse.jetty.webapp.WebInfConfiguration  – Web application not found C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example/webapps/solr.war
+79   [main] WARN  org.eclipse.jetty.webapp.WebAppContext  – Failed startup of context o.e.j.w.WebAppContext{/solr,null},C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example/webapps/solr.war
+java.io.FileNotFoundException: C:\Users\rama\Documents\TNO\solr-4.6.1\solr\example/webapps/solr.war
+	at org.eclipse.jetty.webapp.WebInfConfiguration.unpack(WebInfConfiguration.java:502)
+	at org.eclipse.jetty.webapp.WebInfConfiguration.preConfigure(WebInfConfiguration.java:71)
+	at org.eclipse.jetty.webapp.WebAppContext.preConfigure(WebAppContext.java:457)
+	at org.eclipse.jetty.webapp.WebAppContext.doStart(WebAppContext.java:493)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.deploy.bindings.StandardStarter.processBinding(StandardStarter.java:39)
+	at org.eclipse.jetty.deploy.AppLifeCycle.runBindings(AppLifeCycle.java:186)
+	at org.eclipse.jetty.deploy.DeploymentManager.requestAppGoal(DeploymentManager.java:494)
+	at org.eclipse.jetty.deploy.DeploymentManager.addApp(DeploymentManager.java:141)
+	at org.eclipse.jetty.deploy.providers.ScanningAppProvider.fileAdded(ScanningAppProvider.java:145)
+	at org.eclipse.jetty.deploy.providers.ScanningAppProvider$1.fileAdded(ScanningAppProvider.java:56)
+	at org.eclipse.jetty.util.Scanner.reportAddition(Scanner.java:609)
+	at org.eclipse.jetty.util.Scanner.reportDifferences(Scanner.java:540)
+	at org.eclipse.jetty.util.Scanner.scan(Scanner.java:403)
+	at org.eclipse.jetty.util.Scanner.doStart(Scanner.java:337)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.deploy.providers.ScanningAppProvider.doStart(ScanningAppProvider.java:121)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.deploy.DeploymentManager.startAppProvider(DeploymentManager.java:555)
+	at org.eclipse.jetty.deploy.DeploymentManager.doStart(DeploymentManager.java:230)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.util.component.AggregateLifeCycle.doStart(AggregateLifeCycle.java:81)
+	at org.eclipse.jetty.server.handler.AbstractHandler.doStart(AbstractHandler.java:58)
+	at org.eclipse.jetty.server.handler.HandlerWrapper.doStart(HandlerWrapper.java:96)
+	at org.eclipse.jetty.server.Server.doStart(Server.java:280)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.xml.XmlConfiguration$1.run(XmlConfiguration.java:1259)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at org.eclipse.jetty.xml.XmlConfiguration.main(XmlConfiguration.java:1182)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.jetty.start.Main.invokeMain(Main.java:473)
+	at org.eclipse.jetty.start.Main.start(Main.java:615)
+	at org.eclipse.jetty.start.Main.main(Main.java:96)
+89   [main] WARN  org.eclipse.jetty.util.component.AbstractLifeCycle  – FAILED SocketConnector@0.0.0.0:8983: java.net.BindException: Address already in use: JVM_Bind
+java.net.BindException: Address already in use: JVM_Bind
+	at java.net.PlainSocketImpl.socketBind(Native Method)
+	at java.net.PlainSocketImpl.bind(Unknown Source)
+	at java.net.ServerSocket.bind(Unknown Source)
+	at java.net.ServerSocket.<init>(Unknown Source)
+	at java.net.ServerSocket.<init>(Unknown Source)
+	at org.eclipse.jetty.server.bio.SocketConnector.newServerSocket(SocketConnector.java:96)
+	at org.eclipse.jetty.server.bio.SocketConnector.open(SocketConnector.java:85)
+	at org.eclipse.jetty.server.AbstractConnector.doStart(AbstractConnector.java:316)
+	at org.eclipse.jetty.server.bio.SocketConnector.doStart(SocketConnector.java:156)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.server.Server.doStart(Server.java:291)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.xml.XmlConfiguration$1.run(XmlConfiguration.java:1259)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at org.eclipse.jetty.xml.XmlConfiguration.main(XmlConfiguration.java:1182)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.jetty.start.Main.invokeMain(Main.java:473)
+	at org.eclipse.jetty.start.Main.start(Main.java:615)
+	at org.eclipse.jetty.start.Main.main(Main.java:96)
+90   [main] WARN  org.eclipse.jetty.util.component.AbstractLifeCycle  – FAILED org.eclipse.jetty.server.Server@2980f96c: java.net.BindException: Address already in use: JVM_Bind
+java.net.BindException: Address already in use: JVM_Bind
+	at java.net.PlainSocketImpl.socketBind(Native Method)
+	at java.net.PlainSocketImpl.bind(Unknown Source)
+	at java.net.ServerSocket.bind(Unknown Source)
+	at java.net.ServerSocket.<init>(Unknown Source)
+	at java.net.ServerSocket.<init>(Unknown Source)
+	at org.eclipse.jetty.server.bio.SocketConnector.newServerSocket(SocketConnector.java:96)
+	at org.eclipse.jetty.server.bio.SocketConnector.open(SocketConnector.java:85)
+	at org.eclipse.jetty.server.AbstractConnector.doStart(AbstractConnector.java:316)
+	at org.eclipse.jetty.server.bio.SocketConnector.doStart(SocketConnector.java:156)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.server.Server.doStart(Server.java:291)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.xml.XmlConfiguration$1.run(XmlConfiguration.java:1259)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at org.eclipse.jetty.xml.XmlConfiguration.main(XmlConfiguration.java:1182)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.jetty.start.Main.invokeMain(Main.java:473)
+	at org.eclipse.jetty.start.Main.start(Main.java:615)
+	at org.eclipse.jetty.start.Main.main(Main.java:96)
+java.lang.reflect.InvocationTargetException
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(Unknown Source)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(Unknown Source)
+	at java.lang.reflect.Method.invoke(Unknown Source)
+	at org.eclipse.jetty.start.Main.invokeMain(Main.java:473)
+	at org.eclipse.jetty.start.Main.start(Main.java:615)
+	at org.eclipse.jetty.start.Main.main(Main.java:96)
+Caused by: java.net.BindException: Address already in use: JVM_Bind
+	at java.net.PlainSocketImpl.socketBind(Native Method)
+	at java.net.PlainSocketImpl.bind(Unknown Source)
+	at java.net.ServerSocket.bind(Unknown Source)
+	at java.net.ServerSocket.<init>(Unknown Source)
+	at java.net.ServerSocket.<init>(Unknown Source)
+	at org.eclipse.jetty.server.bio.SocketConnector.newServerSocket(SocketConnector.java:96)
+	at org.eclipse.jetty.server.bio.SocketConnector.open(SocketConnector.java:85)
+	at org.eclipse.jetty.server.AbstractConnector.doStart(AbstractConnector.java:316)
+	at org.eclipse.jetty.server.bio.SocketConnector.doStart(SocketConnector.java:156)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.server.Server.doStart(Server.java:291)
+	at org.eclipse.jetty.util.component.AbstractLifeCycle.start(AbstractLifeCycle.java:64)
+	at org.eclipse.jetty.xml.XmlConfiguration$1.run(XmlConfiguration.java:1259)
+	at java.security.AccessController.doPrivileged(Native Method)
+	at org.eclipse.jetty.xml.XmlConfiguration.main(XmlConfiguration.java:1182)
+	... 7 more
+
+Usage: java -jar start.jar [options] [properties] [configs]
+       java -jar start.jar --help  # for more information
