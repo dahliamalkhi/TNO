@@ -1,0 +1,34 @@
+# We don't check in .class or .war files
+*.class
+*.war
+
+# We don't check in build products
+solr-4.6.1-tno/lucene/build
+solr-4.6.1-tno/solr/build
+solr-4.6.1-tno/solr/dist
+
+# We don't check in state from running demos and tests
+solr-4.6.1-tno/solr/example/logs
+solr-4.6.1-tno/solr/example/solr/collection1/data
+demo/advisor/solr_deployment/logs
+demo/advisor/solr_deployment/solr/collection1/data
+
+# Created by http://www.gitignore.io
+### Intellij ###
+# Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
+## Directory-based project format
+.idea/
+# if you remove the above rule, at least ignore user-specific stuff:
+# .idea/workspace.xml
+# .idea/tasks.xml
+# and these sensitive or high-churn files:
+# .idea/dataSources.ids
+# .idea/dataSources.xml
+# .idea/sqlDataSources.xml
+# .idea/dynamic.xml
+## File-based project format
+*.ipr
+*.iml
+*.iws
+## Additional for IntelliJ
+out/
