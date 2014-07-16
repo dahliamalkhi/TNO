@@ -72,7 +72,9 @@ public abstract class ContentStreamHandlerBase extends RequestHandlerBase {
       ContentStreamLoader documentLoader = newLoader(req, processor);
 
       // TNO
-      collectionKey = SecureCipherUtil.readKey();
+      try {
+        collectionKey = SecureCipherUtil.readKey();
+      } catch (Exception ex) { }
       if (collectionKey == null) collectionKey = SecureCipherUtil.generateKey();
       SecureCipherUtil.addKey(collectionKey);
 
