@@ -27,6 +27,7 @@ import org.apache.lucene.codecs.FieldsConsumer;
 import org.apache.lucene.codecs.DocValuesConsumer;
 import org.apache.lucene.codecs.StoredFieldsWriter;
 import org.apache.lucene.codecs.TermVectorsWriter;
+import org.apache.lucene.codecs.secure.SecureCodec;
 import org.apache.lucene.index.FieldInfo.DocValuesType;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.IOContext;
@@ -310,8 +311,9 @@ final class SegmentMerger {
    * @throws IOException if there is a low-level IO error
    */
   private int mergeFields() throws IOException {
-    final StoredFieldsWriter fieldsWriter = codec.storedFieldsFormat().fieldsWriter(directory, mergeState.segmentInfo, context);
-    
+    final StoredFieldsWriter fieldsWriter = SecureCodec.getDefault().secureStoredFieldsFormat(codec).fieldsWriter(directory, mergeState.segmentInfo, context);
+    //final StoredFieldsWriter fieldsWriter = codec.storedFieldsFormat().fieldsWriter(directory, mergeState.segmentInfo, context);
+
     try {
       return fieldsWriter.merge(mergeState);
     } finally {

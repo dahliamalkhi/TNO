@@ -18,11 +18,13 @@ package org.apache.lucene.codecs.secure;
  */
 
 
+import org.apache.lucene.store.Directory;
 import org.apache.lucene.util.BytesRef;
 
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
 
+import java.io.FileOutputStream;
 import java.util.HashMap;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -54,18 +56,17 @@ public class SecureCipherUtil {
 
   public static SecretKey generateKey() {
     try {
+      new java.io.File(FileName).delete();
       SecretKey key = null;
-      if (key == null) {
-        if (kg == null) kg = KeyGenerator.getInstance(EncryptionAlgorithm);
-        kg.init(new SecureRandom());
-        key = kg.generateKey();
-        if (fileKeys) writeKey(null, key);
-        System.out.println();
-        System.out.println("DBG: SECURECIPHERUTIL: generated collection key");
-        System.out.println();
-      }
+      if (kg == null) kg = KeyGenerator.getInstance(EncryptionAlgorithm);
+      kg.init(new SecureRandom());
+      key = kg.generateKey();
+      if (fileKeys) writeKey(null, key);
+      System.out.println();
+      System.out.println("DBG: SECURECIPHERUTIL: generated collection key");
+      System.out.println();
       return key;
-    }  catch (Exception ex) {
+    } catch (Exception ex) {
       throw new Error(ex.toString());
     }
   }
@@ -200,19 +201,20 @@ public class SecureCipherUtil {
   public static SecretKey readKey() throws IOException {
     InputStream in = new FileInputStream(FileName);
     byte[] inputBytes = new byte[32];
-    in.read();
+    if (':' != (char)in.read()) { in.close(); return null; }
     in.read(inputBytes, 0, inputBytes.length);
     byte[] byteArray = decode(new String(inputBytes));
     SecretKeySpec spec = new SecretKeySpec(byteArray, "AES");
 //    in.readBytes(inputBytes, 0, inputBytes.length);
 //    inputBytes = new byte[2];
 //    in.readBytes(inputBytes, 0, inputBytes.length);
+    in.close();
     return spec;
   }
 
   public static void writeKey(byte[] identity, SecretKey key) throws IOException {
 
-    if (out == null) out = new PrintStream(FileName);
+    if (out == null) out = new PrintStream(new FileOutputStream(FileName, true));
     if (identity != null) out.write(identity, 0, identity.length);
     out.print(':');
     byte[] byteArray = key.getEncoded();
@@ -239,9 +241,10 @@ public class SecureCipherUtil {
   /**
    * Convert bytes to a base16 string.
    */
-  public static String encode(byte[] byteArray) {
-    StringBuffer hexBuffer = new StringBuffer(byteArray.length * 2);
-    for (int i = 0; i < byteArray.length; i++)
+  public static String encode(byte[] byteArray) { return encode(byteArray, 0, byteArray.length); }
+  public static String encode(byte[] byteArray, int offset, int length) {
+    StringBuffer hexBuffer = new StringBuffer(length * 2);
+    for (int i = offset; i < offset+length; i++)
       for (int j = 1; j >= 0; j--)
         hexBuffer.append(HEX[(byteArray[i] >> (j * 4)) & 0xF]);
     return hexBuffer.toString();

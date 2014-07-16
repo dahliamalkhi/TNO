@@ -62,6 +62,9 @@ public abstract class SecureCodec extends Codec {
   /** Securely Encodes/decodes stored fields */
   public abstract SecureStoredFieldsFormat secureStoredFieldsFormat();
 
+  /** Securely Encodes/decodes stored fields */
+  public SecureStoredFieldsFormat secureStoredFieldsFormat(Codec codec) { return secureStoredFieldsFormat(); }
+
   @Override
   /** Encodes/decodes postings */
   public PostingsFormat postingsFormat() { throw new NotImplementedException(); }

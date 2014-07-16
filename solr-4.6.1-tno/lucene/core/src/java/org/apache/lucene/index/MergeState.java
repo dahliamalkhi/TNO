@@ -136,7 +136,8 @@ public class MergeState {
   public FieldInfos fieldInfos;
 
   /** Readers being merged. */
-  public final List<AtomicReader> readers;
+  //public final List<AtomicReader> readers;
+  public List<AtomicReader> readers;
 
   /** Maps docIDs around deletions. */
   public DocMap[] docMaps;

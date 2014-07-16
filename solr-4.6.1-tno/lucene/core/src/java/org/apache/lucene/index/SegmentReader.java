@@ -46,7 +46,7 @@ import org.apache.lucene.codecs.secure.SecureStoredFieldsReader;
  * may share the same core data.
  * @lucene.experimental
  */
-public final class SegmentReader extends AtomicReader {
+public class SegmentReader extends AtomicReader {
 
   private final SegmentCommitInfo si;
   private final Bits liveDocs;
@@ -78,7 +78,9 @@ public final class SegmentReader extends AtomicReader {
   final FieldInfos fieldInfos;
 
   private final List<Long> dvGens = new ArrayList<Long>();
-  
+
+  protected SegmentReader() { si = null; liveDocs = null; numDocs = 0; core = null; segDocValues = null; fieldInfos = null;};
+
   /**
    * Constructs a new SegmentReader with a new core.
    * @throws CorruptIndexException if the index is corrupt
@@ -271,20 +273,20 @@ public final class SegmentReader extends AtomicReader {
     ensureOpen();
     return core.fieldsReaderLocal.get();
   }
-
-  /** Expert: retrieve thread-private {@link
-   *  SecureStoredFieldsReader}
-   *  @lucene.internal */
-  public SecureStoredFieldsReader getSecureFieldsReader() {
-    ensureOpen();
-    return core.secureFieldsReaderLocal.get();
-  }
+//
+//  /** Expert: retrieve thread-private {@link
+//   *  SecureStoredFieldsReader}
+//   *  @lucene.internal */
+//  public SecureStoredFieldsReader getSecureFieldsReader() {
+//    ensureOpen();
+//    return core.secureFieldsReaderLocal.get();
+//  }
 
   @Override
   public void document(int docID, StoredFieldVisitor visitor) throws IOException {
     checkBounds(docID);
     getFieldsReader().visitDocument(docID, visitor);
-    getSecureFieldsReader().visitDocument(docID, visitor);
+//    getSecureFieldsReader().visitDocument(docID, visitor);
   }
 
   @Override

@@ -77,7 +77,7 @@ public class TieredMergePolicy extends MergePolicy {
    *  the index, then we disable compound file for it.
    *  @see MergePolicy#setNoCFSRatio */
   public static final double DEFAULT_NO_CFS_RATIO = 0.1;
-  
+
   private int maxMergeAtOnce = 10;
   private long maxMergedSegmentBytes = 5*1024*1024*1024L;
   private int maxMergeAtOnceExplicit = 30;

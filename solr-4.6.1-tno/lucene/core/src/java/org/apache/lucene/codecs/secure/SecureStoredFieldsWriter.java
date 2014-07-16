@@ -78,41 +78,5 @@ public abstract class SecureStoredFieldsWriter extends StoredFieldsWriter {
   public abstract void finish(FieldInfos fis, int numDocs) throws IOException;
 
   @Override
-  /** Merges in the stored fields from the readers in
-   *  <code>mergeState</code>. The default implementation skips
-   *  over deleted documents, and uses {@link #startDocument(int)},
-   *  {@link #writeField(org.apache.lucene.index.FieldInfo, org.apache.lucene.index.IndexableField)}, and {@link #finish(org.apache.lucene.index.FieldInfos, int)},
-   *  returning the number of documents that were written.
-   *  Implementations can override this method for more sophisticated
-   *  merging (bulk-byte copying, etc). */
-  public int merge(MergeState mergeState) throws IOException
-  {
-    throw new NotImplementedException();
-//    int docCount = 0;
-//    for (AtomicReader reader : mergeState.readers) {
-//      final int maxDoc = reader.maxDoc();
-//      final Bits liveDocs = reader.getLiveDocs();
-//      for (int i = 0; i < maxDoc; i++) {
-//        if (liveDocs != null && !liveDocs.get(i)) {
-//          // skip deleted docs
-//          continue;
-//        }
-//        // TODO: this could be more efficient using
-//        // FieldVisitor instead of loading/writing entire
-//        // doc; ie we just have to renumber the field number
-//        // on the fly?
-//        // NOTE: it's very important to first assign to doc then pass it to
-//        // fieldsWriter.addDocument; see LUCENE-1282
-//        Document doc = reader.document(i);
-//        addDocument(doc, mergeState.fieldInfos);
-//        docCount++;
-//        mergeState.checkAbort.work(300);
-//      }
-//    }
-//    finish(mergeState.fieldInfos, docCount);
-//    return docCount;
-  }
-
-  @Override
   public abstract void close() throws IOException;
 }

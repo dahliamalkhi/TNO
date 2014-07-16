@@ -32,10 +32,10 @@ import org.apache.lucene.codecs.secure.SecureStoredFieldsWriter;
 
 /** This is a StoredFieldsConsumer that writes stored fields. */
 final class StoredFieldsProcessor extends StoredFieldsConsumer {
-  SecureStoredFieldsWriter secureFieldsWriter;
-  final SecureCodec secureCodec;
-  int secureLastDocID;
-
+//  SecureStoredFieldsWriter secureFieldsWriter;
+    final SecureCodec secureCodec;
+//  int secureLastDocID;
+//
   StoredFieldsWriter fieldsWriter;
   final Codec codec;
   int lastDocID;
@@ -50,10 +50,10 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
     this.secureCodec = SecureCodec.getDefault();
   }
 
-  private int numSecureStoredFields;
-  private IndexableField[] secureStoredFields = new IndexableField[1];
-  private FieldInfo[] secureFieldInfos = new FieldInfo[1];
-
+//  private int numSecureStoredFields;
+//  private IndexableField[] secureStoredFields = new IndexableField[1];
+//  private FieldInfo[] secureFieldInfos = new FieldInfo[1];
+//
   private int numStoredFields;
   private IndexableField[] storedFields = new IndexableField[1];
   private FieldInfo[] fieldInfos = new FieldInfo[1];
@@ -62,10 +62,10 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
     numStoredFields = 0;
     Arrays.fill(storedFields, null);
     Arrays.fill(fieldInfos, null);
-
-    numSecureStoredFields = 0;
-    Arrays.fill(secureStoredFields, null);
-    Arrays.fill(secureFieldInfos, null);
+//
+//    numSecureStoredFields = 0;
+//    Arrays.fill(secureStoredFields, null);
+//    Arrays.fill(secureFieldInfos, null);
   }
   
   @Override
@@ -92,36 +92,37 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
           if (success) {
             IOUtils.close(fieldsWriter);
           } else {
-            IOUtils.closeWhileHandlingException(secureFieldsWriter);
+//            IOUtils.closeWhileHandlingException(secureFieldsWriter);
             IOUtils.closeWhileHandlingException(fieldsWriter);
           }
       }
     }
-    if (secureFieldsWriter != null) {
-      boolean success = false;
-      try {
-        secureFieldsWriter.finish(state.fieldInfos, numDocs);
-        success = true;
-      } finally {
-        if (success) {
-          IOUtils.close(secureFieldsWriter);
-        } else {
-          IOUtils.closeWhileHandlingException(secureFieldsWriter);
-        }
-      }
-    }
+//    if (secureFieldsWriter != null) {
+//      boolean success = false;
+//      try {
+//        secureFieldsWriter.finish(state.fieldInfos, numDocs);
+//        success = true;
+//      } finally {
+//        if (success) {
+//          IOUtils.close(secureFieldsWriter);
+//        } else {
+//          IOUtils.closeWhileHandlingException(secureFieldsWriter);
+//        }
+//      }
+//    }
   }
 
   private synchronized void initFieldsWriter(IOContext context) throws IOException {
     if (fieldsWriter == null) {
-      fieldsWriter = codec.storedFieldsFormat().fieldsWriter(docWriter.directory, docWriter.getSegmentInfo(), context);
+//      fieldsWriter = codec.storedFieldsFormat().fieldsWriter(docWriter.directory, docWriter.getSegmentInfo(), context);
+      fieldsWriter = secureCodec.secureStoredFieldsFormat(codec).fieldsWriter(docWriter.directory, docWriter.getSegmentInfo(), context);
       lastDocID = 0;
     }
 
-    if (secureFieldsWriter == null) {
-      secureFieldsWriter = secureCodec.secureStoredFieldsFormat().fieldsWriter(docWriter.directory, docWriter.getSegmentInfo(), context);
-      secureLastDocID = 0;
-    }
+//    if (secureFieldsWriter == null) {
+//      secureFieldsWriter = secureCodec.secureStoredFieldsFormat().fieldsWriter(docWriter.directory, docWriter.getSegmentInfo(), context);
+//      secureLastDocID = 0;
+//    }
   }
 
 
@@ -134,12 +135,12 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
       fieldsWriter = null;
       lastDocID = 0;
     }
-
-    if (secureFieldsWriter != null) {
-      secureFieldsWriter.abort();
-      secureFieldsWriter = null;
-      secureLastDocID = 0;
-    }
+//
+//    if (secureFieldsWriter != null) {
+//      secureFieldsWriter.abort();
+//      secureFieldsWriter = null;
+//      secureLastDocID = 0;
+//    }
   }
 
   /** Fills in any hole in the docIDs */
@@ -151,12 +152,12 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
       lastDocID++;
       fieldsWriter.finishDocument();
     }
-
-    while(secureLastDocID < docID) {
-      secureFieldsWriter.startDocument(0);
-      secureLastDocID++;
-      secureFieldsWriter.finishDocument();
-    }
+//
+//    while(secureLastDocID < docID) {
+//      secureFieldsWriter.startDocument(0);
+//      secureLastDocID++;
+//      secureFieldsWriter.finishDocument();
+//    }
   }
 
   @Override
@@ -174,15 +175,15 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
       fieldsWriter.finishDocument();
       lastDocID++;
     }
-
-    if (secureFieldsWriter != null && numSecureStoredFields > 0) {
-      secureFieldsWriter.startDocument(numSecureStoredFields);
-      for (int i = 0; i < numSecureStoredFields; i++) {
-        secureFieldsWriter.writeField(secureFieldInfos[i], secureStoredFields[i]);
-      }
-      secureFieldsWriter.finishDocument();
-      secureLastDocID++;
-    }
+//
+//    if (secureFieldsWriter != null && numSecureStoredFields > 0) {
+//      secureFieldsWriter.startDocument(numSecureStoredFields);
+//      for (int i = 0; i < numSecureStoredFields; i++) {
+//        secureFieldsWriter.writeField(secureFieldInfos[i], secureStoredFields[i]);
+//      }
+//      secureFieldsWriter.finishDocument();
+//      secureLastDocID++;
+//    }
 
     reset();
     assert docWriter.testPoint("StoredFieldsWriter.finishDocument end");
@@ -191,22 +192,22 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
   @Override
   public void addField(int docID, IndexableField field, FieldInfo fieldInfo) {
     if (field.fieldType().stored()) {
-      if (field.fieldType().encrypted()) {
-        if (numSecureStoredFields == secureStoredFields.length) {
-          int newSize = ArrayUtil.oversize(numSecureStoredFields + 1, RamUsageEstimator.NUM_BYTES_OBJECT_REF);
-          IndexableField[] newArray = new IndexableField[newSize];
-          System.arraycopy(secureStoredFields, 0, newArray, 0, numSecureStoredFields);
-          secureStoredFields = newArray;
-
-          FieldInfo[] newInfoArray = new FieldInfo[newSize];
-          System.arraycopy(secureFieldInfos, 0, newInfoArray, 0, numSecureStoredFields);
-          secureFieldInfos = newInfoArray;
-        }
-
-        secureStoredFields[numSecureStoredFields] = field;
-        secureFieldInfos[numSecureStoredFields] = fieldInfo;
-        numSecureStoredFields++;
-      } else {
+//      if (field.fieldType().encrypted()) {
+//        if (numSecureStoredFields == secureStoredFields.length) {
+//          int newSize = ArrayUtil.oversize(numSecureStoredFields + 1, RamUsageEstimator.NUM_BYTES_OBJECT_REF);
+//          IndexableField[] newArray = new IndexableField[newSize];
+//          System.arraycopy(secureStoredFields, 0, newArray, 0, numSecureStoredFields);
+//          secureStoredFields = newArray;
+//
+//          FieldInfo[] newInfoArray = new FieldInfo[newSize];
+//          System.arraycopy(secureFieldInfos, 0, newInfoArray, 0, numSecureStoredFields);
+//          secureFieldInfos = newInfoArray;
+//        }
+//
+//        secureStoredFields[numSecureStoredFields] = field;
+//        secureFieldInfos[numSecureStoredFields] = fieldInfo;
+//        numSecureStoredFields++;
+//      } else {
         if (numStoredFields == storedFields.length) {
           int newSize = ArrayUtil.oversize(numStoredFields + 1, RamUsageEstimator.NUM_BYTES_OBJECT_REF);
           IndexableField[] newArray = new IndexableField[newSize];
@@ -221,7 +222,7 @@ final class StoredFieldsProcessor extends StoredFieldsConsumer {
         storedFields[numStoredFields] = field;
         fieldInfos[numStoredFields] = fieldInfo;
         numStoredFields++;
-      }
+//      }
 
       assert docState.testPoint("StoredFieldsWriterPerThread.processFields.writeField");
     }
