@@ -286,6 +286,7 @@ public class QueryComponent extends SearchComponent
     cmd.setTimeAllowed(timeAllowed);
     SolrIndexSearcher.QueryResult result = new SolrIndexSearcher.QueryResult();
 
+    // TNO
     //
     // initialize keys
     //

@@ -1,0 +1,26 @@
+<add><doc>
+  <field name="MG">8d60ee8e-be34-43ed-af64-a1bba6a5e968</field>
+  <field name="ManagementGroupName">ManagementGroupName4262</field>
+  <field name="ObjectId">99287198-9915-43b0-b6d0-dd395c62b7fd</field>
+  <field name="ObjectFullName">ObjectFullName2594</field>
+  <field name="HealthServiceId">a7e9fb22-7b09-46d8-8136-ca8b70a95bdd</field>
+  <field name="WorkflowName">WorkflowName2451</field>
+  <field name="WorkflowDisplayName">WorkflowDisplayName626</field>
+  <field name="RuleId">be8d2af2-f65a-49e0-9834-a88120b328cc</field>
+  <field name="ObjectName">ObjectName1864</field>
+  <field name="CounterName">CounterName1304</field>
+  <field name="InstanceName">InstanceName4799</field>
+  <field name="SampleValue">984.00</field>
+  <field name="Min">4625.00</field>
+  <field name="Max">4900.00</field>
+  <field name="Percentile95">3366.00</field>
+  <field name="SampleCount">2647</field>
+  <field name="TimeGenerated">2014-06-14T21:52:50.2980056Z</field>
+  <field name="TenantId">3aa257f3-6656-40fb-9947-a29ab9b0a69d</field>
+  <field name="RootObjectName">RootObjectName3435</field>
+  <field name="ObjectDisplayName">ObjectDisplayName1532</field>
+  <field name="ObjectType">123b6fb4-07e1-440f-b8d3-029c091ce4b9</field>
+  <field name="SourceSystem">SourceSystem2265</field>
+  <field name="id">123b6fb4-07e1-440f-b8d3-029c091ce4b2</field>
+  <field name="Type">PerfHourly</field>
+</doc></add>

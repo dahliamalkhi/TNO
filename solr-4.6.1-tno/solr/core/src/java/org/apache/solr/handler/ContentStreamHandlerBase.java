@@ -16,7 +16,9 @@ package org.apache.solr.handler;
  * limitations under the License.
  */
 
+//TNO
 import org.apache.lucene.codecs.secure.SecureCipherUtil;
+
 import org.apache.solr.common.SolrException;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.solr.common.params.UpdateParams;
@@ -30,6 +32,7 @@ import org.apache.solr.update.processor.UpdateRequestProcessorChain;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+//TNO
 import javax.crypto.SecretKey;
 
 
@@ -54,7 +57,9 @@ public abstract class ContentStreamHandlerBase extends RequestHandlerBase {
     }
   }
 
+  // TNO
   private static SecretKey collectionKey = null;
+
   @Override
   public void handleRequestBody(SolrQueryRequest req, SolrQueryResponse rsp) throws Exception {
     SolrParams params = req.getParams();
@@ -66,6 +71,7 @@ public abstract class ContentStreamHandlerBase extends RequestHandlerBase {
     try {
       ContentStreamLoader documentLoader = newLoader(req, processor);
 
+      // TNO
       collectionKey = SecureCipherUtil.readKey();
       if (collectionKey == null) collectionKey = SecureCipherUtil.generateKey();
       SecureCipherUtil.addKey(collectionKey);
@@ -87,7 +93,10 @@ public abstract class ContentStreamHandlerBase extends RequestHandlerBase {
       }
     } finally {
       // finish the request
+
+      // TNO
       SecureCipherUtil.deleteKey();
+
       processor.finish();
     }
   }
