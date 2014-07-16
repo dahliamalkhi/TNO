@@ -320,11 +320,6 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
     }
   }
 
-  @Override
-  public void merge(MergeState mergeState, Fields fields) throws IOException {
-    throw new NotImplementedException();
-  }
-
   private class SecureCipherTermsWriter extends TermsConsumer {
     private final SecureCipherPostingsWriter postingsWriter;
     private FieldHeader fieldHeader;

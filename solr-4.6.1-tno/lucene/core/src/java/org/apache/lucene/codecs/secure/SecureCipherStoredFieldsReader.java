@@ -17,7 +17,9 @@ package org.apache.lucene.codecs.secure;
  * limitations under the License.
  */
 
+import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.codecs.StoredFieldsReader;
+import org.apache.lucene.document.Field;
 import org.apache.lucene.index.FieldInfo;
 import org.apache.lucene.index.FieldInfos;
 import org.apache.lucene.index.IndexFileNames;
@@ -35,6 +37,7 @@ import org.apache.lucene.util.StringHelper;
 import org.apache.lucene.util.UnicodeUtil;
 
 import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
 import java.io.IOException;
 
 import static org.apache.lucene.codecs.secure.SecureSimpleTextStoredFieldsWriter.DOC;
@@ -60,201 +63,147 @@ import static org.apache.lucene.codecs.secure.SecureSimpleTextStoredFieldsWriter
  * @lucene.experimental
  */
 public class SecureCipherStoredFieldsReader extends SecureStoredFieldsReader {
-  private long offsets[]; /* docid -> offset in .sec.fld file */
-  private IndexInput in;
-  private BytesRef scratch = new BytesRef();
-  private CharsRef scratchUTF16 = new CharsRef();
+//  private long offsets[]; /* docid -> offset in .sec.fld file */
+//  private IndexInput in;
+//  private BytesRef scratch = new BytesRef();
+//  private CharsRef scratchUTF16 = new CharsRef();
   private final FieldInfos fieldInfos;
+
   private Cipher cipher = null;
 
+  private StoredFieldsReader reader = null;
 
-  public SecureCipherStoredFieldsReader(Directory directory, SegmentInfo si, FieldInfos fn, IOContext context) throws IOException {
+  public SecureCipherStoredFieldsReader(Codec codec, Directory directory, SegmentInfo si, FieldInfos fn, IOContext context) throws IOException {
+    this.reader = codec.storedFieldsFormat().fieldsReader(directory, si, fn, context);
     this.fieldInfos = fn;
-    boolean success = false;
+
     try {
-      in = directory.openInput(IndexFileNames.segmentFileName(si.name, "", SecureSimpleTextStoredFieldsWriter.FIELDS_EXTENSION), context);
-      cipher = Cipher.getInstance("AES");
-      success = true;
-    }  catch (Exception ex) {} finally {
-      if (!success) {
+      cipher = Cipher.getInstance(SecureCipherStoredFieldsFormat.EncryptionAlgorithm);
+    }  catch (Exception ex) {
         try {
-          close();
+          reader.close();
         } catch (Throwable t) {} // ensure we throw our original exception
-      }
     }
-    readIndex(si.getDocCount());
   }
 
   // used by clone
-  SecureCipherStoredFieldsReader(long offsets[], IndexInput in, FieldInfos fieldInfos) {
-    this.offsets = offsets;
-    this.in = in;
+  SecureCipherStoredFieldsReader(StoredFieldsReader reader, FieldInfos fieldInfos) {
     this.fieldInfos = fieldInfos;
+    this.reader = reader;
     try {
-      this.cipher = Cipher.getInstance("AES");
+      this.cipher = Cipher.getInstance(SecureCipherStoredFieldsFormat.EncryptionAlgorithm);
     } catch (Exception ex) {
       throw new Error(ex);
     }
   }
-  
-  // we don't actually write a .fdx-like index, instead we read the 
-  // stored fields file in entirety up-front and save the offsets 
-  // so we can seek to the documents later.
-  private void readIndex(int size) throws IOException {
-    offsets = new long[size];
-    int upto = 0;
-    while (!scratch.equals(END)) {
-      readLine();
-      if (StringHelper.startsWith(scratch, DOC)) {
-        offsets[upto] = in.getFilePointer();
-        upto++;
+
+  public StoredFieldsReader getStoredFieldsReader() { return reader; }
+
+  class SecureStoredFieldVisitor extends StoredFieldVisitor {
+
+    private final StoredFieldVisitor visitor;
+    public SecureStoredFieldVisitor(StoredFieldVisitor visitor) {
+      this.visitor = visitor;
+    }
+
+    @Override
+    public void binaryField(FieldInfo fieldInfo, byte[] value) throws IOException {
+      if (fieldInfo.isEncrypted()) {
+        readField(value, fieldInfo, visitor);
+      } else {
+        visitor.binaryField(fieldInfo, value);
       }
     }
-    assert upto == offsets.length;
+
+    @Override
+    public void stringField(FieldInfo fieldInfo, String value) throws IOException {
+      visitor.stringField(fieldInfo, value);
+    }
+
+    @Override
+    public void intField(FieldInfo fieldInfo, int value) throws IOException {
+      visitor.intField(fieldInfo, value);
+    }
+
+    @Override
+    public void longField(FieldInfo fieldInfo, long value) throws IOException {
+      visitor.longField(fieldInfo, value);
+    }
+
+    @Override
+    public void floatField(FieldInfo fieldInfo, float value) throws IOException {
+      visitor.floatField(fieldInfo, value);
+    }
+
+    @Override
+    public void doubleField(FieldInfo fieldInfo, double value) throws IOException {
+      visitor.doubleField(fieldInfo, value);
+    }
+
+    @Override
+    public Status needsField(FieldInfo fieldInfo) throws IOException {
+      return visitor.needsField(fieldInfo);
+    }
   }
   
   @Override
   public void visitDocument(int n, StoredFieldVisitor visitor) throws IOException {
-    in.seek(offsets[n]);
-    readLine();
-    assert StringHelper.startsWith(scratch, NUM);
-    int numFields = parseIntAt(NUM.length);
-    
-    for (int i = 0; i < numFields; i++) {
-      readLine();
-      assert StringHelper.startsWith(scratch, FIELD);
-      int fieldNumber = parseIntAt(FIELD.length);
-      FieldInfo fieldInfo = fieldInfos.fieldInfo(fieldNumber);
-      assert fieldInfo.isEncrypted();
-      readLine();
-      assert StringHelper.startsWith(scratch, NAME);
-      readLine();
-      assert StringHelper.startsWith(scratch, TYPE);
-      
-      final BytesRef type;
-      if (equalsAt(TYPE_STRING, scratch, TYPE.length)) {
-        type = TYPE_STRING;
-      } else if (equalsAt(TYPE_BINARY, scratch, TYPE.length)) {
-        type = TYPE_BINARY;
-      } else if (equalsAt(TYPE_INT, scratch, TYPE.length)) {
-        type = TYPE_INT;
-      } else if (equalsAt(TYPE_LONG, scratch, TYPE.length)) {
-        type = TYPE_LONG;
-      } else if (equalsAt(TYPE_FLOAT, scratch, TYPE.length)) {
-        type = TYPE_FLOAT;
-      } else if (equalsAt(TYPE_DOUBLE, scratch, TYPE.length)) {
-        type = TYPE_DOUBLE;
-      } else {
-        throw new RuntimeException("unknown field type");
-      }
-
-      switch (visitor.needsField(fieldInfo)) {
-        case YES:
-          readField(type, fieldInfo, visitor);
-          break;
-        case NO:   
-          readLine();
-          assert StringHelper.startsWith(scratch, VALUE);
-          break;
-        case STOP: return;
-      }
-    }
+    reader.visitDocument(n, new SecureStoredFieldVisitor(visitor));
   }
   
-  private void readField(BytesRef type, FieldInfo fieldInfo, StoredFieldVisitor visitor) throws IOException {
-    readLine();
-    assert StringHelper.startsWith(scratch, VALUE);
-
-    String value = new String(scratch.bytes, scratch.offset + VALUE.length, scratch.length - VALUE.length, "UTF-8");
+  private void readField(byte[] bytes, FieldInfo fieldInfo, StoredFieldVisitor visitor) throws IOException {
     if (!SecureCipherUtil.hasKey(fieldInfo.name)) {
-      if (type == TYPE_BINARY) {
-        byte[] bytes = SecureCipherUtil.decode(value);
-        visitor.binaryField(fieldInfo, bytes);
-      } else {
-        visitor.stringField(fieldInfo, value);
-      }
+      String value = SecureCipherUtil.encode(bytes, 0, bytes.length);
+      visitor.stringField(fieldInfo, value);
       return;
     }
 
-    byte[] bytes = SecureCipherUtil.decode(value);
     byte[] decryptedBytes = null;
     try {
-      cipher.init(Cipher.DECRYPT_MODE, SecureCipherUtil.getKey(fieldInfo.name));
-      decryptedBytes = cipher.doFinal(bytes);
+      cipher.init(Cipher.DECRYPT_MODE, SecureCipherUtil.getKey(fieldInfo.name), new IvParameterSpec(bytes, 0, 16));
+      decryptedBytes = cipher.doFinal(bytes, 16, bytes.length - 16);
     } catch (Exception ex) {
-      if (type == TYPE_BINARY) {
-        visitor.binaryField(fieldInfo, bytes);
-      } else {
-        visitor.stringField(fieldInfo, value);
-      }
+      String value = SecureCipherUtil.encode(bytes, 0, bytes.length);
+      visitor.stringField(fieldInfo, value);
       return;
     }
 
     assert decryptedBytes != null;
-    if (type == TYPE_BINARY) {
-      visitor.binaryField(fieldInfo, decryptedBytes);
-      //byte[] copy = new byte[scratch.length-VALUE.length];
-      //System.arraycopy(scratch.bytes, scratch.offset+VALUE.length, copy, 0, copy.length);
-      //visitor.binaryField(fieldInfo, copy);
+    int type = decryptedBytes[0];
+    byte[] plainBytes = new byte[decryptedBytes.length-1];
+    System.arraycopy(decryptedBytes, 1, plainBytes, 0, decryptedBytes.length-1);
+    if (type == SecureCipherStoredFieldsFormat.TYPE_BINARY) {
+      visitor.binaryField(fieldInfo, plainBytes);
     } else {
-      value = new String(decryptedBytes);
-      if (type == TYPE_STRING) {
+      if (type == SecureCipherStoredFieldsFormat.TYPE_STRING) {
+        String value = new String(plainBytes, IOUtils.CHARSET_UTF_8);
         visitor.stringField(fieldInfo, value);
-        //visitor.stringField(fieldInfo, new String(scratch.bytes, scratch.offset+VALUE.length, scratch.length-VALUE.length, "UTF-8"));
-      } else if (type == TYPE_INT) {
-        //UnicodeUtil.UTF8toUTF16(scratch.bytes, scratch.offset+VALUE.length, scratch.length-VALUE.length, scratchUTF16);
-        //visitor.intField(fieldInfo, Integer.parseInt(scratchUTF16.toString()));
-        visitor.intField(fieldInfo, Integer.parseInt(value));
-      } else if (type == TYPE_LONG) {
-        //UnicodeUtil.UTF8toUTF16(scratch.bytes, scratch.offset+VALUE.length, scratch.length-VALUE.length, scratchUTF16);
-        //visitor.longField(fieldInfo, Long.parseLong(scratchUTF16.toString()));
-        visitor.longField(fieldInfo, Long.parseLong(value));
-      } else if (type == TYPE_FLOAT) {
-        //UnicodeUtil.UTF8toUTF16(scratch.bytes, scratch.offset+VALUE.length, scratch.length-VALUE.length, scratchUTF16);
-        //visitor.floatField(fieldInfo, Float.parseFloat(scratchUTF16.toString()));
-        visitor.floatField(fieldInfo, Float.parseFloat(value));
-      } else if (type == TYPE_DOUBLE) {
-        //UnicodeUtil.UTF8toUTF16(scratch.bytes, scratch.offset+VALUE.length, scratch.length-VALUE.length, scratchUTF16);
-        //visitor.doubleField(fieldInfo, Double.parseDouble(scratchUTF16.toString()));
-        visitor.doubleField(fieldInfo, Double.parseDouble(value));
+      } else if (type == SecureCipherStoredFieldsFormat.TYPE_INT) {
+        int i = ((int)plainBytes[0]) << 24 | ((int)plainBytes[1]) << 16 | ((int)plainBytes[2]) << 8 | ((int)plainBytes[3]);
+        visitor.intField(fieldInfo, i);
+      } else if (type == SecureCipherStoredFieldsFormat.TYPE_LONG) {
+        long l = ((long)plainBytes[0]) << 56 | ((long)plainBytes[1]) << 48 | ((long)plainBytes[2]) << 40 | ((long)plainBytes[3]) << 32;
+        l |= ((long)plainBytes[5]) << 24 | ((long)plainBytes[6]) << 16 | ((long)plainBytes[7]) << 8 | ((long)plainBytes[8]);
+        visitor.longField(fieldInfo, l);
+      } else if (type == SecureCipherStoredFieldsFormat.TYPE_FLOAT) {
+        int i = ((int)plainBytes[0]) << 24 | ((int)plainBytes[1]) << 16 | ((int)plainBytes[2]) << 8 | ((int)plainBytes[3]);
+        visitor.floatField(fieldInfo, Float.intBitsToFloat(i));
+      } else if (type == SecureCipherStoredFieldsFormat.TYPE_DOUBLE) {
+        long l = ((long)plainBytes[0]) << 56 | ((long)plainBytes[1]) << 48 | ((long)plainBytes[2]) << 40 | ((long)plainBytes[3]) << 32;
+        l |= ((long)plainBytes[5]) << 24 | ((long)plainBytes[6]) << 16 | ((long)plainBytes[7]) << 8 | ((long)plainBytes[8]);
+        visitor.doubleField(fieldInfo, Double.longBitsToDouble(l));
       }
     }
   }
 
   @Override
   public StoredFieldsReader clone() {
-    if (in == null) {
-      throw new AlreadyClosedException("this FieldsReader is closed");
-    }
-    return new SecureCipherStoredFieldsReader(offsets, in.clone(), fieldInfos);
+    return new SecureCipherStoredFieldsReader(reader.clone(), fieldInfos);
   }
   
   @Override
-  public void close() throws IOException {
-    try {
-      IOUtils.close(in); 
-    } finally {
-      in = null;
-      offsets = null;
-    }
-  }
-  
-  private void readLine() throws IOException {
-    SimpleTextUtil.readLine(in, scratch);
-  }
-  
-  private int parseIntAt(int offset) {
-    UnicodeUtil.UTF8toUTF16(scratch.bytes, scratch.offset+offset, scratch.length-offset, scratchUTF16);
-    return ArrayUtil.parseInt(scratchUTF16.chars, 0, scratchUTF16.length);
-  }
-  
-  private boolean equalsAt(BytesRef a, BytesRef b, int bOffset) {
-    return a.length == b.length - bOffset && 
-        ArrayUtil.equals(a.bytes, a.offset, b.bytes, b.offset + bOffset, b.length - bOffset);
-  }
+  public void close() throws IOException { reader.close(); }
 
   @Override
-  public long ramBytesUsed() {
-    return 0;
-  }
+  public long ramBytesUsed() { return reader.ramBytesUsed(); }
 }

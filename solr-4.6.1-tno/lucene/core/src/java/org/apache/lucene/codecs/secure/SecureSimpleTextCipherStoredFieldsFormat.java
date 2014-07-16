@@ -17,9 +17,6 @@ package org.apache.lucene.codecs.secure;
  * limitations under the License.
  */
 
-import org.apache.lucene.codecs.Codec;
-import org.apache.lucene.codecs.StoredFieldsReader;
-import org.apache.lucene.codecs.StoredFieldsWriter;
 import org.apache.lucene.index.FieldInfos;
 import org.apache.lucene.index.SegmentInfo;
 import org.apache.lucene.store.Directory;
@@ -33,26 +30,15 @@ import java.io.IOException;
  * <b><font color="red">FOR RECREATIONAL USE ONLY</font></B>
  * @lucene.experimental
  */
-public class SecureCipherStoredFieldsFormat extends SecureStoredFieldsFormat {
-  public static final String EncryptionAlgorithm = "AES/CBC/PKCS5Padding";
-
-  public static final int TYPE_STRING = 0x01;
-  public static final int TYPE_BINARY = 0x02;
-  public static final int TYPE_INT = 0x03;
-  public static final int TYPE_FLOAT = 0x04;
-  public static final int TYPE_LONG = 0x05;
-  public static final int TYPE_DOUBLE = 0x06;
-
-  private Codec codec;
-  public SecureCipherStoredFieldsFormat(Codec codec) { this.codec = codec;}
+public class SecureSimpleTextCipherStoredFieldsFormat extends SecureStoredFieldsFormat {
 
   @Override
   public SecureStoredFieldsReader fieldsReader(Directory directory, SegmentInfo si, FieldInfos fn, IOContext context) throws IOException {;
-    return new SecureCipherStoredFieldsReader(codec, directory, si, fn, context);
+    return new SecureSimpleTextCipherStoredFieldsReader(directory, si, fn, context);
   }
 
   @Override
   public SecureStoredFieldsWriter fieldsWriter(Directory directory, SegmentInfo si, IOContext context) throws IOException {
-    return new SecureCipherStoredFieldsWriter(codec, directory, si, context);
+    return new SecureSimpleTextCipherStoredFieldsWriter(directory, si.name, context);
   }
 }

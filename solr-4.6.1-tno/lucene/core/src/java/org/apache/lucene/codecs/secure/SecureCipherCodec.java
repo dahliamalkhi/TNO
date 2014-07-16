@@ -17,6 +17,7 @@ package org.apache.lucene.codecs.secure;
  * limitations under the License.
  */
 
+import org.apache.lucene.codecs.Codec;
 import org.apache.lucene.codecs.PostingsFormat;
 
 /**
@@ -27,7 +28,8 @@ import org.apache.lucene.codecs.PostingsFormat;
  */
 public final class SecureCipherCodec extends SecureCodec {
   private final SecurePostingsFormat postings = new SecureCipherPostingsFormat();
-  private final SecureStoredFieldsFormat storedFields = new SecureCipherStoredFieldsFormat();
+  private final SecureStoredFieldsFormat storedFields = new SecureSimpleTextCipherStoredFieldsFormat();
+
 //  private final SegmentInfoFormat segmentInfos = new SimpleTextSegmentInfoFormat();
 //  private final FieldInfosFormat fieldInfosFormat = new SimpleTextFieldInfosFormat();
 //  private final TermVectorsFormat vectorsFormat = new SimpleTextTermVectorsFormat();
@@ -42,6 +44,11 @@ public final class SecureCipherCodec extends SecureCodec {
   @Override
   public SecureStoredFieldsFormat secureStoredFieldsFormat() {
     return storedFields;
+  }
+
+  @Override
+  public SecureStoredFieldsFormat secureStoredFieldsFormat(Codec codec) {
+    return new SecureCipherStoredFieldsFormat(codec);
   }
 
   @Override

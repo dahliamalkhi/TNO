@@ -60,7 +60,7 @@ final class SegmentCoreReaders {
 
   final int termsIndexDivisor;
 
-  final SecureStoredFieldsReader secureFieldsReaderOrig;
+//  final SecureStoredFieldsReader secureFieldsReaderOrig;
   final StoredFieldsReader fieldsReaderOrig;
   final TermVectorsReader termVectorsReaderOrig;
   final CompoundFileDirectory cfsReader;
@@ -68,13 +68,13 @@ final class SegmentCoreReaders {
   // TODO: make a single thread local w/ a
   // Thingy class holding fieldsReader, termVectorsReader,
   // normsProducer
-
-  final CloseableThreadLocal<SecureStoredFieldsReader> secureFieldsReaderLocal = new CloseableThreadLocal<SecureStoredFieldsReader>() {
-    @Override
-    protected SecureStoredFieldsReader initialValue() {
-      return (SecureStoredFieldsReader)secureFieldsReaderOrig.clone();
-    }
-  };
+//
+//  final CloseableThreadLocal<SecureStoredFieldsReader> secureFieldsReaderLocal = new CloseableThreadLocal<SecureStoredFieldsReader>() {
+//    @Override
+//    protected SecureStoredFieldsReader initialValue() {
+//      return (SecureStoredFieldsReader)secureFieldsReaderOrig.clone();
+//    }
+//  };
 
   final CloseableThreadLocal<StoredFieldsReader> fieldsReaderLocal = new CloseableThreadLocal<StoredFieldsReader>() {
     @Override
@@ -141,9 +141,10 @@ final class SegmentCoreReaders {
       } else {
         normsProducer = null;
       }
-  
-      fieldsReaderOrig = si.info.getCodec().storedFieldsFormat().fieldsReader(cfsDir, si.info, fieldInfos, context);
-      secureFieldsReaderOrig = SecureCodec.getDefault().secureStoredFieldsFormat().fieldsReader(cfsDir, si.info, fieldInfos, context);
+
+      fieldsReaderOrig = SecureCodec.getDefault().secureStoredFieldsFormat(si.info.getCodec()).fieldsReader(cfsDir, si.info, fieldInfos, context);
+//      fieldsReaderOrig = si.info.getCodec().storedFieldsFormat().fieldsReader(cfsDir, si.info, fieldInfos, context);
+//      secureFieldsReaderOrig = SecureCodec.getDefault().secureStoredFieldsFormat().fieldsReader(cfsDir, si.info, fieldInfos, context);
 
       if (fieldInfos.hasVectors()) { // open term vector files only as needed
         termVectorsReaderOrig = si.info.getCodec().termVectorsFormat().vectorsReader(cfsDir, si.info, fieldInfos, context);
@@ -186,7 +187,7 @@ final class SegmentCoreReaders {
 //      System.err.println("--- closing core readers");
       IOUtils.close(termVectorsLocal, fieldsReaderLocal, normsLocal, fields, termVectorsReaderOrig, fieldsReaderOrig,
           cfsReader, normsProducer);
-      IOUtils.close(secureFieldsReaderLocal, secureFieldsReaderOrig);
+//      IOUtils.close(secureFieldsReaderLocal, secureFieldsReaderOrig);
 //      IOUtils.close(secureFields);
       notifyCoreClosedListeners();
     }
@@ -216,7 +217,7 @@ final class SegmentCoreReaders {
         ((fields!=null) ? fields.ramBytesUsed() : 0) +
 //        ((secureFields!=null) ? secureFields.ramBytesUsed() : 0) +
         ((fieldsReaderOrig!=null)? fieldsReaderOrig.ramBytesUsed() : 0) +
-        ((secureFieldsReaderOrig!=null)? secureFieldsReaderOrig.ramBytesUsed() : 0) +
+//        ((secureFieldsReaderOrig!=null)? secureFieldsReaderOrig.ramBytesUsed() : 0) +
         ((termVectorsReaderOrig!=null) ? termVectorsReaderOrig.ramBytesUsed() : 0);
   }
 }
