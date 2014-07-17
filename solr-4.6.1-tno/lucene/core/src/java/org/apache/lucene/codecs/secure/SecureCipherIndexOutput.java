@@ -179,6 +179,21 @@ public class SecureCipherIndexOutput extends IndexOutput {
 
       currentBuf = (int)(pos / BufSize);
       currentPos = (int)(pos % BufSize);
+
+      // If pos == 0 the corresponding buffer might not have been allocated already
+      // So we reset currentPos and currentBuf to point to the end of the previous buffer
+      // If required writeBytes will do the allocation.
+      // Note that: allocating a buffer might require the array of buffers to be expanded as well
+      // Since this is complex (and could potentially allocate 2x unncessary space) we do it in writeBytes.
+      if (pos == cipherLength && buffer[currentBuf] == null) {
+        if (currentPos != 0 || currentBuf == 0) {
+          System.out.println("FATAL: SecureCipherIndexOutput: seek: wrong state at eof");
+          assert false;
+        }
+
+        currentPos += BufSize;
+        --currentBuf;
+      }
       assert buffer[currentBuf] != null;
     }
     else {
