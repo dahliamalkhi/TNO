@@ -10,4 +10,4 @@ source ../../scripts/env.sh
 SOLR_DEPLOYMENT_PATH=solr_deployment
 
 echo Posting XML documents...
-( pushd ${SOLR_DEPLOYMENT_PATH} && java -jar post.jar exampledocs/*.xml )
+( pushd ${SOLR_DEPLOYMENT_PATH} && java -Durl=http://${SOLR_SERVER_HOSTNAME}:8983/solr/update -jar post.jar exampledocs/*.xml )

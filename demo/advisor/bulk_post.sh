@@ -10,7 +10,8 @@ source ../../scripts/env.sh
 # Note that each file contains one Solr document per row (after first row which contains column field names)
 # The present Advisor files have 500 Solr documents per file.
 
-DOCUMENT_SOURCE=//jcurrey/data_gen/PerfHourly_200000_500
+#DOCUMENT_SOURCE now defined in env.sh
+
 NUM_DOCS_PER_FILE=500
 echo "${NUM_DOCS_PER_FILE} Solr docs per file"
 
@@ -41,8 +42,9 @@ fi
 
 FILE_COUNT=1
 while read INPUT_FILE; do
-  echo "  Ingesting file ${FILE_COUNT} : ${DOCUMENT_SOURCE}/${INPUT_FILE}..."
+  echo
+  echo "  Ingesting file ${FILE_COUNT} : ${DOCUMENT_SOURCE}/${INPUT_FILE} ..."
   ./post_csv_file.sh ${DOCUMENT_SOURCE}/${INPUT_FILE}
   (( FILE_COUNT += 1 ))
-  sleep 1
+  #sleep 1
 done <${FILES_TO_INGEST}

@@ -19,10 +19,18 @@ fi
 export PATH=${JAVA_BIN_PATH}:${PATH}
 
 HOST=`hostname`
+export SOLR_SERVER_HOSTNAME=
+export DOCUMENT_SOURCE=
 if [[ "${HOST}" == "TNO-Scale-Test1" ]]; then
   SOLR_SERVER_HOSTNAME=localhost
+  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
 elif [[ "${HOST}" == "TNO-Scale-Test2" ]]; then
-  SOLR_SERVER_HOSTNAME=TNO-Scale-Test1
+  SOLR_SERVER_HOSTNAME=tno-scale-test1.cloudapp.net
+  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  DOCUMENT_SOURCE=/f/PerfHourly_200000_500
 else
   SOLR_SERVER_HOSTNAME=localhost
+  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  DOCUMENT_SOURCE=//jcurrey/data_gen/PerfHourly_200000_500
 fi
+#echo SOLR_SERVER_HOSTNAME=${SOLR_SERVER_HOSTNAME}
