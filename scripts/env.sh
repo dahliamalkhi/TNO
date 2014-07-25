@@ -27,7 +27,7 @@ if [[ "${HOST}" == "TNO-Scale-Test1" ]]; then
 elif [[ "${HOST}" == "TNO-Scale-Test2" ]]; then
   SOLR_SERVER_HOSTNAME=tno-scale-test1.cloudapp.net
   #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
-  DOCUMENT_SOURCE=/f/PerfHourly_200000_500
+  DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 else
   SOLR_SERVER_HOSTNAME=localhost
   #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}

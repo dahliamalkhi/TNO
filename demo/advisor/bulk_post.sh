@@ -43,8 +43,8 @@ fi
 FILE_COUNT=1
 while read INPUT_FILE; do
   echo
-  echo "  Ingesting file ${FILE_COUNT} : ${DOCUMENT_SOURCE}/${INPUT_FILE} ..."
-  ./post_csv_file.sh ${DOCUMENT_SOURCE}/${INPUT_FILE}
+  POST_COMMENT="Posting file ${FILE_COUNT}"
+  ./post_csv_file.sh ${DOCUMENT_SOURCE}/${INPUT_FILE} "${POST_COMMENT}"
   (( FILE_COUNT += 1 ))
   #sleep 1
 done <${FILES_TO_INGEST}
