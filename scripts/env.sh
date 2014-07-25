@@ -20,9 +20,9 @@ export PATH=${JAVA_BIN_PATH}:${PATH}
 
 HOST=`hostname`
 if [[ "${HOST}" == "TNO-Scale-Test1" ]]; then
-  TNO_POST_HOSTNAME=localhost
+  SOLR_SERVER_HOSTNAME=localhost
 elif [[ "${HOST}" == "TNO-Scale-Test2" ]]; then
-  TNO_POST_HOSTNAME=TNO-Scale-Test1
+  SOLR_SERVER_HOSTNAME=TNO-Scale-Test1
 else
-  TNO_POST_HOSTNAME=localhost
+  SOLR_SERVER_HOSTNAME=localhost
 fi

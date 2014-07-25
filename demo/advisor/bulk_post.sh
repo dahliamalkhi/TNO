@@ -4,6 +4,9 @@
 #    $'\r': command not found
 # As per http://stackoverflow.com/questions/14598753/running-bash-script-in-cygwin-on-windows-7
 
+# Configure environment variables etc
+source ../../scripts/env.sh
+
 # Note that each file contains one Solr document per row (after first row which contains column field names)
 # The present Advisor files have 500 Solr documents per file.
 

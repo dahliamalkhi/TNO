@@ -4,6 +4,9 @@
 #    $'\r': command not found
 # As per http://stackoverflow.com/questions/14598753/running-bash-script-in-cygwin-on-windows-7
 
+# Configure environment variables etc
+source ../../scripts/env.sh
+
 SOLR_DEPLOYMENT_PATH=solr_deployment
 
 echo Posting XML documents...

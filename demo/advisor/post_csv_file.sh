@@ -4,6 +4,9 @@
 #    $'\r': command not found
 # As per http://stackoverflow.com/questions/14598753/running-bash-script-in-cygwin-on-windows-7
 
+# Configure environment variables etc
+source ../../scripts/env.sh
+
 # There should be exactly one argument
 if [ "$#" -ne 1 ]; then
   echo "Please specify the path to the CSV file to upload (and nothing else). Exiting..."
@@ -26,4 +29,4 @@ fi
 
 # For now, enumerate the field names to overcome the fact that the files all have 'Id' when 'id' is the required unique key.
 # TODO: Understand why this issue does not occur in the Advisor environment, which the CSV files come from.
-curl --data-binary @${INPUT_FILE} -H 'Content-type:text/plain; charset=utf-8' 'http://localhost:8983/solr/update/csv?header=false&skipLines=1&fieldnames=MG,ManagementGroupName,ObjectId,ObjectFullName,HealthServiceId,WorkflowName,WorkflowDisplayName,RuleId,ObjectName,CounterName,InstanceName,SampleValue,Min,Max,Percentile95,SampleCount,TimeGenerated,TenantId,RootObjectName,ObjectDisplayName,ObjectType,SourceSystem,id,Type&commit=true'
+curl --data-binary @${INPUT_FILE} -H 'Content-type:text/plain; charset=utf-8' 'http://${SOLR_SERVER_HOSTNAME}:8983/solr/update/csv?header=false&skipLines=1&fieldnames=MG,ManagementGroupName,ObjectId,ObjectFullName,HealthServiceId,WorkflowName,WorkflowDisplayName,RuleId,ObjectName,CounterName,InstanceName,SampleValue,Min,Max,Percentile95,SampleCount,TimeGenerated,TenantId,RootObjectName,ObjectDisplayName,ObjectType,SourceSystem,id,Type&commit=true'
