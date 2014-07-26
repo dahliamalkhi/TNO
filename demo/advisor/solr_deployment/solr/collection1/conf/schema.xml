@@ -567,8 +567,8 @@
     <field name="MG" type="uuid" default="00000000-0000-0000-0000-000000000000" indexed="true" stored="true" docValues="false" encrypted="true" omitNorms="true"/>
     <field name="MachineAccountQuota" type="text_general" indexed="false" stored="true" docValues="false"/>
     <field name="MachineInventory" type="text_general" indexed="false" stored="true" docValues="false"/>
-<!-- TNO    <field name="ManagementGroupName" type="string" indexed="true" stored="true"/> -->
-    <field name="ManagementGroupName" type="string" indexed="true" stored="true" encrypted="true" omitNorms="true"/>
+    <field name="ManagementGroupName" type="string" indexed="true" stored="true"/>
+<!-- TNO reverted for now    <field name="ManagementGroupName" type="string" indexed="true" stored="true" encrypted="true" omitNorms="true"/> -->
     <field name="Max" type="tfloat" indexed="true" stored="true"/>
     <field name="MaxPasswordAge" type="text_general" indexed="false" stored="true" docValues="false"/>
     <field name="MemUsagePercent" type="double" indexed="false" stored="true" docValues="false"/>
@@ -881,7 +881,8 @@
   <copyField source="LogonProcessName" dest="text"/>
   <copyField source="LogonType" dest="text"/>
   <copyField source="LogonTypeName" dest="text"/>
-<!-- TNO  <copyField source="ManagementGroupName" dest="text"/> -->
+<!-- TNO Don't have to comment out below copyField, when ManagementGroupName is not encrypted -->
+  <copyField source="ManagementGroupName" dest="text"/>
   <copyField source="Message" dest="text"/>
   <copyField source="Name" dest="text"/>
   <copyField source="NewProcessName" dest="text"/>

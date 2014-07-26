@@ -5,9 +5,16 @@
 # As per http://stackoverflow.com/questions/14598753/running-bash-script-in-cygwin-on-windows-7
 
 # Configure environment variables etc
-source ../../scripts/env.sh
+source env.sh
 
-SOLR_DEPLOYMENT_PATH=solr_deployment
+ANT_BIN_PATH=`pwd`/dependencies/apache-ant-1.8.2/bin
+if [[ "${PATH}" != "*apache-ant-1.8.2*" ]]; then
+  #echo "  ** Adding ant bin dir to PATH **"
+  export PATH=${ANT_BIN_PATH}:${PATH}
+fi
 
-echo Posting XML documents...
-( pushd ${SOLR_DEPLOYMENT_PATH} && java -Durl=http://${SOLR_SERVER_HOSTNAME}:8983/solr/update -jar post.jar exampledocs/*.xml )
+pushd solr-4.6.1-tno/
+ant ivy-bootstrap
+cd solr
+ant dist
+popd

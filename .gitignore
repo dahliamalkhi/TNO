@@ -2,6 +2,9 @@
 *.class
 *.war
 
+# We don't check in unpacked dependencies
+dependencies/java/*/unpacked
+
 # We don't check in build products
 solr-4.6.1-tno/lucene/build
 solr-4.6.1-tno/solr/build

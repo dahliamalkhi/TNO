@@ -4,6 +4,9 @@
 #    $'\r': command not found
 # As per http://stackoverflow.com/questions/14598753/running-bash-script-in-cygwin-on-windows-7
 
+# Configure environment variables etc
+source ../../scripts/env.sh
+
 COLLECTION_NAME=collection1
 SOLR_DIST_PATH=../../solr-4.6.1-tno/solr/dist
 SOLR_DEPLOYMENT_PATH=solr_deployment
@@ -26,12 +29,6 @@ echo
 echo Updating Solr WAR file...
 [ ! -d ${SOLR_DEPLOYMENT_PATH}/webapps ] && mkdir ${SOLR_DEPLOYMENT_PATH}/webapps
 cp ${SOLR_DIST_PATH}/solr-4.6-SNAPSHOT.war ${SOLR_DEPLOYMENT_PATH}/webapps/solr.war
-
-echo Deleting existing indexes...
-rm -rf ${SOLR_DEPLOYMENT_PATH}/solr/${COLLECTION_NAME}/data
-
-echo Deleting TNO keys file...
-rm -f ${SOLR_DEPLOYMENT_PATH}/SecureCipherUtil.Keys.txt
 
 echo Deleting log files in example\logs...
 rm -f ${SOLR_DEPLOYMENT_PATH}/logs/*

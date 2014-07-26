@@ -7,7 +7,12 @@
 # Configure environment variables etc
 source ../../scripts/env.sh
 
+COLLECTION_NAME=collection1
+SOLR_DIST_PATH=../../solr-4.6.1-tno/solr/dist
 SOLR_DEPLOYMENT_PATH=solr_deployment
 
-echo Posting XML documents...
-( pushd ${SOLR_DEPLOYMENT_PATH} && java -Durl=http://${SOLR_SERVER_HOSTNAME}:8983/solr/update -jar post.jar exampledocs/*.xml )
+echo Deleting existing indexes...
+rm -rf ${SOLR_DEPLOYMENT_PATH}/solr/${COLLECTION_NAME}/data
+
+echo Deleting TNO keys file...
+rm -f ${SOLR_DEPLOYMENT_PATH}/SecureCipherUtil.Keys.txt
