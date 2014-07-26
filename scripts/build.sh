@@ -5,7 +5,7 @@
 # As per http://stackoverflow.com/questions/14598753/running-bash-script-in-cygwin-on-windows-7
 
 # Configure environment variables etc
-source env.sh
+source ./scripts/env.sh
 
 ANT_BIN_PATH=`pwd`/dependencies/apache-ant-1.8.2/bin
 if [[ "${PATH}" != "*apache-ant-1.8.2*" ]]; then
