@@ -6,6 +6,9 @@
 dependencies/java/*/unpacked
 
 # We don't check in build products
+solr-4.6.1/lucene/build
+solr-4.6.1/solr/build
+solr-4.6.1/solr/dist
 solr-4.6.1-tno/lucene/build
 solr-4.6.1-tno/solr/build
 solr-4.6.1-tno/solr/dist
