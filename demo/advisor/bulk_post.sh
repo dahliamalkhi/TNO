@@ -40,6 +40,14 @@ else
   cp ${FULL_FILE_LIST} ${FILES_TO_INGEST}
 fi
 
+START_TIME=`date +%s`
+START_TIME_NICE=`date -d @${START_TIME}`
+# run for 8 hours max
+MAX_RUNTIME=28800
+END_TIME=$(( ${START_TIME} + ${MAX_RUNTIME} ))
+END_TIME_NICE=`date -d @${END_TIME}`
+echo Currently ${START_TIME_NICE}. Will end at ${END_TIME_NICE}
+
 FILE_COUNT=1
 while read INPUT_FILE; do
   echo
@@ -47,4 +55,8 @@ while read INPUT_FILE; do
   ./post_csv_file.sh ${DOCUMENT_SOURCE}/${INPUT_FILE} "${POST_COMMENT}"
   (( FILE_COUNT += 1 ))
   #sleep 1
+  if [[ $(date +%s) -ge ${END_TIME} ]]; then
+    echo Exiting at ${END_TIME_NICE} - after ${MAX_RUNTIME} seconds.
+    break
+  fi  
 done <${FILES_TO_INGEST}
