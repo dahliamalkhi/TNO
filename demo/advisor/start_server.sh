@@ -11,13 +11,18 @@ COLLECTION_NAME=collection1
 SOLR_DIST_PATH=../../solr-4.6.1-tno/solr/dist
 SOLR_DEPLOYMENT_PATH=solr_deployment
 
-# Currently just one (optional) argument: 'debug', which enables the Java debugger.
+# Two (optional) arguments
+# TODO: Make it so you can use them both at once
 DEBUG_FLAGS=
 if [ "$#" -eq 1 ]; then
   if [ "$1" == "debug" ]; then
+    # 'debug' enables the Java debugger.
     DEBUG_FLAGS="-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=5901"
+  elif [ "$1" == "vanilla" ]; then
+    # 'vanilla' uses the vanilla Solr distribution, rather than the TNO version.
+    SOLR_DIST_PATH=../../solr-4.6.1/solr/dist
   else
-    echo "Only (optional) argument is 'debug'. Exiting ..."
+    echo "Only (optional) arguments are 'debug' and 'vanilla'. Exiting ..."
 	exit 1
   fi
 fi
@@ -28,6 +33,7 @@ echo
 
 echo Updating Solr WAR file...
 [ ! -d ${SOLR_DEPLOYMENT_PATH}/webapps ] && mkdir ${SOLR_DEPLOYMENT_PATH}/webapps
+echo Using Solr dist from ${SOLR_DIST_PATH}
 cp ${SOLR_DIST_PATH}/solr-4.6-SNAPSHOT.war ${SOLR_DEPLOYMENT_PATH}/webapps/solr.war
 
 echo Deleting log files in example\logs...
@@ -35,6 +41,4 @@ rm -f ${SOLR_DEPLOYMENT_PATH}/logs/*
 
 echo
 echo Starting Solr...
-# Add -XX:+PrintHeapAtGC
-#( pushd ${SOLR_DEPLOYMENT_PATH} && java ${DEBUG_FLAGS} -jar start.jar )
 ( pushd ${SOLR_DEPLOYMENT_PATH} && java ${DEBUG_FLAGS} -XX:+PrintHeapAtGC -jar start.jar )
