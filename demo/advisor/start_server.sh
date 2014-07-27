@@ -35,4 +35,6 @@ rm -f ${SOLR_DEPLOYMENT_PATH}/logs/*
 
 echo
 echo Starting Solr...
-( pushd ${SOLR_DEPLOYMENT_PATH} && java ${DEBUG_FLAGS} -jar start.jar )
+# Add -XX:+PrintHeapAtGC
+#( pushd ${SOLR_DEPLOYMENT_PATH} && java ${DEBUG_FLAGS} -jar start.jar )
+( pushd ${SOLR_DEPLOYMENT_PATH} && java ${DEBUG_FLAGS} -XX:+PrintHeapAtGC -jar start.jar )
