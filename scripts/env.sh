@@ -35,6 +35,14 @@ elif [[ "${HOST}" == "TNO-Scale-Test4" ]]; then
   SOLR_SERVER_HOSTNAME=tno-scale-test3.cloudapp.net
   #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
   DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
+elif [[ "${HOST}" == "TNO-Scale-Test5" ]]; then
+  SOLR_SERVER_HOSTNAME=localhost
+  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+elif [[ "${HOST}" == "TNO-Scale-Test6" ]]; then
+  # hostname 5a rather than 5 due to a DNS issue during provisioning.
+  SOLR_SERVER_HOSTNAME=tno-scale-test5a.cloudapp.net
+  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 else
   SOLR_SERVER_HOSTNAME=localhost
   #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
