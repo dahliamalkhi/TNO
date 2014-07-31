@@ -14,12 +14,14 @@ solr-4.6.1-tno/solr/build
 solr-4.6.1-tno/solr/dist
 
 # We don't check in state from running demos and tests
-SecureCipherUtil.Keys.txt
 solr-4.6.1-tno/solr/example/logs*
 solr-4.6.1-tno/solr/example/solr/collection1/data*
 demo/advisor/solr_deployment/logs*
 demo/advisor/solr_deployment/solr/collection1/data*
 demo/advisor/temp_files_to_ingest.txt
+
+# (Currently, SecureCipherUtil.Keys.txt is checked in, to give well-known keys)
+#SecureCipherUtil.Keys.txt
 
 # Created by http://www.gitignore.io
 ### Intellij ###
