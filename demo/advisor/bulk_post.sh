@@ -43,18 +43,21 @@ fi
 START_TIME=`date +%s`
 START_TIME_NICE=`date -d @${START_TIME}`
 # run for 8 hours max
-MAX_RUNTIME=28800
+#MAX_RUNTIME=28800
+#JC
+MAX_RUNTIME=100000
 END_TIME=$(( ${START_TIME} + ${MAX_RUNTIME} ))
 END_TIME_NICE=`date -d @${END_TIME}`
 echo Currently ${START_TIME_NICE}. Will end at ${END_TIME_NICE}
 
 FILE_COUNT=1
 while read INPUT_FILE; do
-  echo
-  POST_COMMENT="Posting file ${FILE_COUNT}"
+  TIMESTAMP=`date`
+  POST_COMMENT="Post: ${FILE_COUNT} at ${TIMESTAMP}"
   ./post_csv_file.sh ${DOCUMENT_SOURCE}/${INPUT_FILE} "${POST_COMMENT}"
   (( FILE_COUNT += 1 ))
-  #sleep 1
+#JC
+  sleep 1
   if [[ $(date +%s) -ge ${END_TIME} ]]; then
     echo Exiting at ${END_TIME_NICE} - after ${MAX_RUNTIME} seconds.
     break

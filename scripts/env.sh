@@ -20,32 +20,32 @@ export PATH=${JAVA_BIN_PATH}:${PATH}
 
 HOST=`hostname`
 export SOLR_SERVER_HOSTNAME=
+export SOLR_SERVER_PORT=
 export DOCUMENT_SOURCE=
 if [[ "${HOST}" == "TNO-Scale-Test1" ]]; then
   SOLR_SERVER_HOSTNAME=localhost
-  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  SOLR_SERVER_PORT=":8983"
 elif [[ "${HOST}" == "TNO-Scale-Test2" ]]; then
   SOLR_SERVER_HOSTNAME=tno-scale-test1.cloudapp.net
-  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  SOLR_SERVER_PORT=":8983"
   DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 elif [[ "${HOST}" == "TNO-Scale-Test3" ]]; then
   SOLR_SERVER_HOSTNAME=localhost
-  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  SOLR_SERVER_PORT=":8983"
 elif [[ "${HOST}" == "TNO-Scale-Test4" ]]; then
   SOLR_SERVER_HOSTNAME=tno-scale-test3.cloudapp.net
-  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  SOLR_SERVER_PORT=":8983"
   DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 elif [[ "${HOST}" == "TNO-Scale-Test5" ]]; then
   SOLR_SERVER_HOSTNAME=localhost
-  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  SOLR_SERVER_PORT=":8983"
 elif [[ "${HOST}" == "TNO-Scale-Test6" ]]; then
   # hostname 5a rather than 5 due to a DNS issue during provisioning.
   SOLR_SERVER_HOSTNAME=tno-scale-test5a.cloudapp.net
-  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
+  SOLR_SERVER_PORT=":8983"
   DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 else
   SOLR_SERVER_HOSTNAME=localhost
-  #echo Setting SOLR_SERVER_HOSTNAME to ${SOLR_SERVER_HOSTNAME}
   DOCUMENT_SOURCE=//jcurrey/data_gen/PerfHourly_200000_500
 fi
 #echo SOLR_SERVER_HOSTNAME=${SOLR_SERVER_HOSTNAME}
