@@ -42,21 +42,31 @@ fi
 
 START_TIME=`date +%s`
 START_TIME_NICE=`date -d @${START_TIME}`
-# run for 8 hours max
-#MAX_RUNTIME=28800
-#JC
-MAX_RUNTIME=100000
+
+# 28800 = run for 8 hours max
+MAX_RUNTIME=28800
 END_TIME=$(( ${START_TIME} + ${MAX_RUNTIME} ))
 END_TIME_NICE=`date -d @${END_TIME}`
-echo Currently ${START_TIME_NICE}. Will end at ${END_TIME_NICE}
+echo Currently ${START_TIME_NICE}. Will run for ${MAX_RUNTIME} seconds, ending at ${END_TIME_NICE}
 
-FILE_COUNT=1
+echo Starting at ${STARTCLOCKTIME} - time since epoch start ${STARTEPOCHTIME}
+echo postNum,numDocs,timeEpoch,timeStart,totalTime,curlStatus,lookupTime,connectTime,pretransfterTime,starttransferTime
+
+NUMDOCS=0
+ITERATION=1
+START_TIME_EPOCH_NANO=`date "+%s.%N"`
 while read INPUT_FILE; do
-  TIMESTAMP=`date`
-  POST_COMMENT="Post: ${FILE_COUNT} at ${TIMESTAMP}"
+  CURRENT_TIME_EPOCH_NANO=`date "+%s.%N"`
+
+  # TODO: Move this calculation after run curl, even though it is reporting the time that start curl.
+  # Don't want to include the time to spawn a subshell and run awk.
+  TIME_SINCE_START=`echo - | awk "{ print ${CURRENT_TIME_EPOCH_NANO} - ${START_TIME_EPOCH_NANO} }"`
+
+  POST_COMMENT="${ITERATION},${NUMDOCS},${CURRENT_TIME_EPOCH_NANO},${TIME_SINCE_START}"
   ./post_csv_file.sh ${DOCUMENT_SOURCE}/${INPUT_FILE} "${POST_COMMENT}"
-  (( FILE_COUNT += 1 ))
-#JC
+  (( ITERATION += 1 ))
+  (( NUMDOCS += ${NUM_DOCS_PER_FILE} ))
+
   sleep 1
   if [[ $(date +%s) -ge ${END_TIME} ]]; then
     echo Exiting at ${END_TIME_NICE} - after ${MAX_RUNTIME} seconds.
