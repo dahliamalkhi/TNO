@@ -20,6 +20,11 @@ demo/advisor/solr_deployment/logs*
 demo/advisor/solr_deployment/solr/collection1/data*
 demo/advisor/temp_files_to_ingest.txt
 
+# We don't check in test results in the dir they are created in...
+# (copy them under /experiments dir)
+demo/advisor/stdout.*
+demo/advisor/query_output/*
+
 # (Currently, SecureCipherUtil.Keys.txt is checked in, to give well-known keys)
 #SecureCipherUtil.Keys.txt
 

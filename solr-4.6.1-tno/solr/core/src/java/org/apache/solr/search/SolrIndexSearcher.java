@@ -220,9 +220,10 @@ public class SolrIndexSearcher extends IndexSearcher implements Closeable,SolrIn
     useFilterForSortedQuery = solrConfig.useFilterForSortedQuery;
     enableLazyFieldLoading = solrConfig.enableLazyFieldLoading;
     
+	// TNO
     //cachingEnabled=enableCache;
     cachingEnabled=false;
-    log.info("RAMA: setting cachingEnabled to false.");
+    log.info("TNO: setting cachingEnabled to false.");
     if (cachingEnabled) {
       ArrayList<SolrCache> clist = new ArrayList<SolrCache>();
       fieldValueCache = solrConfig.fieldValueCacheConfig==null ? null : solrConfig.fieldValueCacheConfig.newInstance();
