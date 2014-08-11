@@ -34,6 +34,10 @@ if [ "$#" -eq 1 ]; then
 fi
 echo KEYS_STRING = ${KEYS_STRING}
 
+export FACET_STRING="&facet=true&facet.field=ObjectFullName&facet.field=MG&facet.field=WorkflowName&rows=0&facet.mincount=1&facet.date=TimeGenerated&facet.date.start=2013-03-10T00:00:00Z&facet.date.end=2014-12-17T00:00:00Z&facet.date.gap=%2B1HOUR"
+#export FACET_STRING=""
+echo FACET_STRING = ${FACET_STRING}
+
 # # Curl output goes into ./query_output
 # # Force the user to manage the contents.
 # if [ -e "./query_output" ]; then
@@ -65,7 +69,7 @@ while [[ ${ITERATION} -le ${NUM_ITERATIONS} ]]; do
   CURRENT_TIME_EPOCH_NANO=`date "+%s.%N"`
   
   # -s -S : Don't show progress info, but do show errors.
-  CURL_OUTPUT=`curl -s -S --write-out "%{time_total},%{http_code},%{time_namelookup},%{time_connect},%{time_pretransfer},%{time_starttransfer}\n" -o query_output/query.${ITERATION}.txt "http://${SOLR_SERVER_HOSTNAME}${SOLR_SERVER_PORT}/solr/collection1/select?q=${QUERY}&wt=json&indent=true&facet=true&facet.field=ObjectFullName&facet.field=MG&facet.field=WorkflowName&rows=0&facet.mincount=1&facet.date=TimeGenerated&facet.date.start=2013-03-10T00:00:00Z&facet.date.end=2014-12-17T00:00:00Z&facet.date.gap=%2B1HOUR${KEYS_STRING}"`
+  CURL_OUTPUT=`curl -s -S --write-out "%{time_total},%{http_code},%{time_namelookup},%{time_connect},%{time_pretransfer},%{time_starttransfer}\n" -o query_output/query.${ITERATION}.txt "http://${SOLR_SERVER_HOSTNAME}${SOLR_SERVER_PORT}/solr/collection1/select?q=${QUERY}&wt=json&indent=true${FACET_STRING}${KEYS_STRING}"`
 
   # Do this calculation after run curl, even though it is reporting the time that start curl.
   # Don't want to include the time to spawn a subshell and run awk.
