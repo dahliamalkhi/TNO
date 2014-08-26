@@ -50,20 +50,20 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-class SecureCipherFieldsReader extends FieldsProducer {
+class SecureCipherOldFieldsReader extends FieldsProducer {
   private static long StartTime = System.currentTimeMillis();
   private final String segmentName;
 
   private final TreeMap<String,Long> fields;
-  private TreeMap<String, SecureCipherFieldsWriter.FieldHeader> fieldHeaders;
+  private TreeMap<String, SecureCipherOldFieldsWriter.FieldHeader> fieldHeaders;
   //private final IndexInput in;
   private final SecureCipherIndexInput in;
   private final FieldInfos fieldInfos;
 
-  final static byte[] FIELD        = SecureCipherFieldsWriter.FIELD;
-  final static byte[] TERM         = SecureCipherFieldsWriter.TERM;
+  final static byte[] FIELD        = SecureCipherOldFieldsWriter.FIELD;
+  final static byte[] TERM         = SecureCipherOldFieldsWriter.TERM;
 
-  public SecureCipherFieldsReader(SegmentReadState state) throws IOException {
+  public SecureCipherOldFieldsReader(SegmentReadState state) throws IOException {
     segmentName = state.segmentInfo.name;
     System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherFieldsReader: const: start\r\n");
     fieldInfos = state.fieldInfos;
@@ -74,8 +74,8 @@ class SecureCipherFieldsReader extends FieldsProducer {
       in = new SecureCipherIndexInput(inner_in.clone());
 
       //this.in = inner_in;
-      SecureCipherFieldsWriter.CollectionHeader header = new SecureCipherFieldsWriter.CollectionHeader(in);
-      fields = readFields(in, header.fieldCount, header.fieldsFP);
+      SecureCipherOldFieldsWriter.CollectionHeader header = new SecureCipherOldFieldsWriter.CollectionHeader(in);
+      fields = readFields(in, header.fieldCount);
       success = true;
     } finally {
       if (!success) {
@@ -85,18 +85,19 @@ class SecureCipherFieldsReader extends FieldsProducer {
     System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherFieldsReader: const: end\r\n");
   }
 
-  private TreeMap<String,Long> readFields(IndexInput in, int fieldCount, long fieldStart) throws IOException {
+  private TreeMap<String,Long> readFields(IndexInput in, int fieldCount) throws IOException {
     System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherFieldsReader: readFields: start\r\n");
 
     TreeMap<String,Long> fields = new TreeMap<String,Long>();
-    TreeMap<String,SecureCipherFieldsWriter.FieldHeader> fieldHeaders = new TreeMap<String,SecureCipherFieldsWriter.FieldHeader>();
+    TreeMap<String,SecureCipherOldFieldsWriter.FieldHeader> fieldHeaders = new TreeMap<String,SecureCipherOldFieldsWriter.FieldHeader>();
 
-    in.seek(fieldStart);
+    long fieldStart = in.getFilePointer();
     for (int f = 0; f < fieldCount; ++f) {
-      SecureCipherFieldsWriter.FieldHeader fieldHeader = new SecureCipherFieldsWriter.FieldHeader(in);
-      //fields.put(fieldHeader.name, in.getFilePointer());
+      in.seek(fieldStart);
+      SecureCipherOldFieldsWriter.FieldHeader fieldHeader = new SecureCipherOldFieldsWriter.FieldHeader(in);
+      fields.put(fieldHeader.name, in.getFilePointer());
       fieldHeaders.put(fieldHeader.name, fieldHeader);
-      fields.put(fieldHeader.name, fieldHeader.termsFP);
+      fieldStart = fieldHeader.next;
     }
     this.fieldHeaders = fieldHeaders;
     System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherFieldsReader: readFields: end\r\n");
@@ -110,8 +111,8 @@ class SecureCipherFieldsReader extends FieldsProducer {
     private long docsStart;
     private boolean ended;
     private BytesRefFSTEnum<PairOutputs.Pair<Long,PairOutputs.Pair<Long,Long>>> fstEnum;
-    private HashMap<BytesRef, SecureCipherFieldsWriter.TermHeader> map;
-    private SecureCipherFieldsWriter.TermHeader current = null;
+    private HashMap<BytesRef, SecureCipherOldFieldsWriter.TermHeader> map;
+    private SecureCipherOldFieldsWriter.TermHeader current = null;
     private final IndexInput in;
 
     private final SecretKey fieldKey;
@@ -125,6 +126,13 @@ class SecureCipherFieldsReader extends FieldsProducer {
       System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: cons: end\r\n");
     }
 
+//    public SecureCipherTermsEnum(HashMap<BytesRef, SecureCipherOldFieldsWriter.TermHeader> map, IndexOptions indexOptions, IndexInput in, SecretKey fieldKey) {
+//      this.indexOptions = indexOptions;
+//      this.map = map;
+//      this.in = in;
+//      this.fieldKey = fieldKey;
+//    }
+//
     @Override
     public boolean seekExact(BytesRef text) throws IOException {
       System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: seekExact: start " + text.utf8ToString() + "\r\n");
@@ -138,6 +146,17 @@ class SecureCipherFieldsReader extends FieldsProducer {
           docsStart = pair1.output1;
           docFreq = pair2.output1.intValue();
           totalTermFreq = pair2.output2;
+          retVal = true;
+        } else {
+          retVal = false;
+        }
+      } else {
+        SecureCipherOldFieldsWriter.TermHeader result = map.get(text);
+        if (result != null) {
+          current = result;
+          docsStart = result.nextFP;
+          docFreq = result.docFreq;
+          totalTermFreq = result.totalTermFreq;
           retVal = true;
         } else {
           retVal = false;
@@ -179,7 +198,7 @@ class SecureCipherFieldsReader extends FieldsProducer {
 
     @Override
     public BytesRef next() throws IOException {
-      System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: next: start\r\n");
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: next: start\r\n");
 
       BytesRef retVal = null;
       if (fstEnum != null) {
@@ -198,7 +217,7 @@ class SecureCipherFieldsReader extends FieldsProducer {
       } else {
         throw new NotImplementedException();
       }
-      System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: next: end\r\n");
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: next: end\r\n");
       return retVal;
     }
 
@@ -233,15 +252,15 @@ class SecureCipherFieldsReader extends FieldsProducer {
  
     @Override
     public DocsEnum docs(Bits liveDocs, DocsEnum reuse, int flags) throws IOException {
-      System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: docs: start " + term().utf8ToString() + " " + docFreq + " " + totalTermFreq + "\r\n");
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: docs: start " + term().utf8ToString() + " " + docFreq + " " + totalTermFreq + "\r\n");
       SecureCipherDocsEnum docsEnum;
-      if (reuse != null && reuse instanceof SecureCipherDocsEnum && ((SecureCipherDocsEnum) reuse).canReuse(SecureCipherFieldsReader.this.in)) {
+      if (reuse != null && reuse instanceof SecureCipherDocsEnum && ((SecureCipherDocsEnum) reuse).canReuse(SecureCipherOldFieldsReader.this.in)) {
         docsEnum = (SecureCipherDocsEnum) reuse;
       } else {
         docsEnum = new SecureCipherDocsEnum(in);
       }
       docsEnum = docsEnum.reset(docsStart, liveDocs, indexOptions == IndexOptions.DOCS_ONLY, docFreq, fieldKey);
-      System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: docs: end " + term().utf8ToString() + " " + docFreq + " " + totalTermFreq + "\r\n");
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: docs: end " + term().utf8ToString() + " " + docFreq + " " + totalTermFreq + "\r\n");
       return docsEnum;
     }
 
@@ -255,7 +274,7 @@ class SecureCipherFieldsReader extends FieldsProducer {
 
       System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTermsEnum: docsAndPositions: start\r\n");
       SecureCipherDocsAndPositionsEnum docsAndPositionsEnum;
-      if (reuse != null && reuse instanceof SecureCipherDocsAndPositionsEnum && ((SecureCipherDocsAndPositionsEnum) reuse).canReuse(SecureCipherFieldsReader.this.in)) {
+      if (reuse != null && reuse instanceof SecureCipherDocsAndPositionsEnum && ((SecureCipherDocsAndPositionsEnum) reuse).canReuse(SecureCipherOldFieldsReader.this.in)) {
         docsAndPositionsEnum = (SecureCipherDocsAndPositionsEnum) reuse;
       } else {
         docsAndPositionsEnum = new SecureCipherDocsAndPositionsEnum(in);
@@ -285,7 +304,7 @@ class SecureCipherFieldsReader extends FieldsProducer {
     private final IndexInput insecureIn;
 
     public SecureCipherDocsEnum(IndexInput in) {
-      //this.inStart = SecureCipherFieldsReader.this.in;
+      //this.inStart = SecureCipherOldFieldsReader.this.in;
       this.inStart = in;
       //this.in = this.inStart.clone();
       this.insecureIn = this.inStart.clone();
@@ -329,10 +348,10 @@ class SecureCipherFieldsReader extends FieldsProducer {
     public int nextDoc() throws IOException {
       while (current < docCount) {
         if (omitTF) {
-          SecureCipherFieldsWriter.DocsOnlyTermValue termValue = new SecureCipherFieldsWriter.DocsOnlyTermValue(in);
+          SecureCipherOldFieldsWriter.DocsOnlyTermValue termValue = new SecureCipherOldFieldsWriter.DocsOnlyTermValue(in);
           docID = termValue.docID;
         } else {
-          SecureCipherFieldsWriter.DocsAndFreqsTermValue termValue = new SecureCipherFieldsWriter.DocsAndFreqsTermValue(in);
+          SecureCipherOldFieldsWriter.DocsAndFreqsTermValue termValue = new SecureCipherOldFieldsWriter.DocsAndFreqsTermValue(in);
           docID = termValue.docID;
           tf = termValue.termDocFreq;
         }
@@ -382,7 +401,7 @@ class SecureCipherFieldsReader extends FieldsProducer {
     private final IndexInput insecureIn;
 
     public SecureCipherDocsAndPositionsEnum(IndexInput in) {
-      //this.inStart = SecureCipherFieldsReader.this.in;
+      //this.inStart = SecureCipherOldFieldsReader.this.in;
       this.inStart = in;
       //this.in = this.inStart.clone();
       this.insecureIn = this.inStart.clone();
@@ -433,7 +452,7 @@ class SecureCipherFieldsReader extends FieldsProducer {
 
       while (current < docCount) {
         in.seek(nextDocStart);
-        SecureCipherFieldsWriter.DocsAndFreqsAndPositionsTermValue termValue = new SecureCipherFieldsWriter.DocsAndFreqsAndPositionsTermValue(in);
+        SecureCipherOldFieldsWriter.DocsAndFreqsAndPositionsTermValue termValue = new SecureCipherOldFieldsWriter.DocsAndFreqsAndPositionsTermValue(in);
         docID = termValue.docID;
         tf = termValue.termDocFreq;
 
@@ -513,13 +532,13 @@ class SecureCipherFieldsReader extends FieldsProducer {
 
   private class SecureCipherTerms extends Terms {
     private final long termsStart;
-    //private final long termsEnd;
+    private final long termsEnd;
     private final FieldInfo fieldInfo;
     private long sumTotalTermFreq;
     private long sumDocFreq;
     private int docCount;
     private FST<PairOutputs.Pair<Long,PairOutputs.Pair<Long,Long>>> fst;
-    private HashMap<BytesRef, SecureCipherFieldsWriter.TermHeader> map;
+    private HashMap<BytesRef, SecureCipherOldFieldsWriter.TermHeader> map;
     private int termCount;
     private final BytesRef scratch = new BytesRef(10);
     private final CharsRef scratchUTF16 = new CharsRef(10);
@@ -527,10 +546,10 @@ class SecureCipherFieldsReader extends FieldsProducer {
 
     private final SecretKey fieldKey;
 
-    public SecureCipherTerms(SecureCipherFieldsWriter.FieldHeader fieldHeader, long termsStart) throws Exception {
+    public SecureCipherTerms(SecureCipherOldFieldsWriter.FieldHeader fieldHeader, long termsStart) throws Exception {
       System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTerms: cons: start\r\n");
 
-      //this.termsEnd = fieldHeader.next;
+      this.termsEnd = fieldHeader.next;
       this.docCount = fieldHeader.docCount;
       this.sumDocFreq = fieldHeader.sumDocFreq;
       this.sumTotalTermFreq = fieldHeader.sumTotalTermFreq;
@@ -539,13 +558,12 @@ class SecureCipherFieldsReader extends FieldsProducer {
       //SecretKey fieldKey = SecureCipherUtil.getKey(fieldHeader.name);
       fieldKey = SecureCipherUtil.getKey(fieldHeader.name);
       if (fieldKey == null) throw new InvalidKeyException();
-      SecureCipherIndexInput secureCipherIndexInput = SecureCipherFieldsReader.this.in.clone();
+      SecureCipherIndexInput secureCipherIndexInput = SecureCipherOldFieldsReader.this.in.clone();
       secureCipherIndexInput.seek(termsStart);
       try {
         //in = secureCipherIndexInput.startDecryption(fieldKey);
         in = secureCipherIndexInput;
-        //this.termsStart = in.getFilePointer();
-        this.termsStart = fieldHeader.termsFP;
+        this.termsStart = in.getFilePointer();
         loadTerms(fieldHeader.termCount);
       } catch (Exception ex) {
         secureCipherIndexInput.close();
@@ -564,17 +582,15 @@ class SecureCipherFieldsReader extends FieldsProducer {
       final PairOutputs<Long,PairOutputs.Pair<Long,Long>> outputs = new PairOutputs<Long,PairOutputs.Pair<Long,Long>>(posIntOutputs, outputsInner);
       b = new Builder<PairOutputs.Pair<Long,PairOutputs.Pair<Long,Long>>>(FST.INPUT_TYPE.BYTE1, outputs);
 
-      //long nextTermFP = termsStart;
+      long nextTermFP = termsStart;
       long docsStart = -1;
       long sumDocFreq = 0;
       long sumTotalTermFreq = 0;
       final IntsRef scratchIntsRef = new IntsRef();
-      in.seek(termsStart);
-      System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTerms: loadTerms: sought " + in.getFilePointer() + "\r\n");
       for (int t = 0; t < nTerms; ++t) {
-        SecureCipherFieldsWriter.TermHeader termHeader = new SecureCipherFieldsWriter.TermHeader(in);
-        //docsStart = in.getFilePointer();
-        docsStart = termHeader.startFP;
+        in.seek(nextTermFP);
+        SecureCipherOldFieldsWriter.TermHeader termHeader = new SecureCipherOldFieldsWriter.TermHeader(in);
+        docsStart = in.getFilePointer();
         assert docsStart > 0;
         assert termHeader.docFreq > 0;
         assert termHeader.totalTermFreq > 0;
@@ -584,8 +600,9 @@ class SecureCipherFieldsReader extends FieldsProducer {
         sumDocFreq += termHeader.docFreq;
         sumTotalTermFreq += termHeader.totalTermFreq;
         termCount++;
+
+        nextTermFP = termHeader.next;
       }
-      System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SecureCipherTerms: loadTerms: iterated " + in.getFilePointer() + "\r\n");
       fst = b.finish();
 
       assert this.sumDocFreq == sumDocFreq;
@@ -682,7 +699,7 @@ class SecureCipherFieldsReader extends FieldsProducer {
     Terms terms = termsCache.get(field);
     if (terms == null) {
       Long fp = fields.get(field);
-      SecureCipherFieldsWriter.FieldHeader fh = fieldHeaders.get(field);
+      SecureCipherOldFieldsWriter.FieldHeader fh = fieldHeaders.get(field);
       if (fp == null) {
         return null;
       } else {

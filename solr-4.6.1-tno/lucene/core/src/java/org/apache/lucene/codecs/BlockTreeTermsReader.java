@@ -87,6 +87,8 @@ import org.apache.lucene.util.fst.Util;
  */
 
 public class BlockTreeTermsReader extends FieldsProducer {
+  private static long StartTime = System.currentTimeMillis();
+  private final String segmentName;
 
   // Open input to the main terms dict file (_X.tib)
   private final IndexInput in;
@@ -114,12 +116,14 @@ public class BlockTreeTermsReader extends FieldsProducer {
                               PostingsReaderBase postingsReader, IOContext ioContext,
                               String segmentSuffix, int indexDivisor)
     throws IOException {
-    
+    segmentName = info.name;
+    //System.out.print("Dbg: " + (System.currentTimeMillis() - StartTime) + " ms: " + segmentName + ": BlockTreeTermsReader: const: start\r\n");
+
     this.postingsReader = postingsReader;
 
     this.segment = info.name;
     in = dir.openInput(IndexFileNames.segmentFileName(segment, segmentSuffix, BlockTreeTermsWriter.TERMS_EXTENSION),
-                       ioContext);
+        ioContext);
 
     boolean success = false;
     IndexInput indexIn = null;
@@ -128,7 +132,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
       version = readHeader(in);
       if (indexDivisor != -1) {
         indexIn = dir.openInput(IndexFileNames.segmentFileName(segment, segmentSuffix, BlockTreeTermsWriter.TERMS_INDEX_EXTENSION),
-                                ioContext);
+            ioContext);
         int indexVersion = readIndexHeader(indexIn);
         if (indexVersion != version) {
           throw new CorruptIndexException("mixmatched version files: " + in + "=" + version + "," + indexIn + "=" + indexVersion);
@@ -149,7 +153,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
         throw new CorruptIndexException("invalid numFields: " + numFields + " (resource=" + in + ")");
       }
 
-      for(int i=0;i<numFields;i++) {
+      for (int i = 0; i < numFields; i++) {
         final int field = in.readVInt();
         final long numTerms = in.readVLong();
         assert numTerms >= 0;
@@ -158,7 +162,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
         in.readBytes(rootCode.bytes, 0, numBytes);
         rootCode.length = numBytes;
         final FieldInfo fieldInfo = fieldInfos.fieldInfo(field);
-        assert fieldInfo != null: "field=" + field;
+        assert fieldInfo != null : "field=" + field;
         final long sumTotalTermFreq = fieldInfo.getIndexOptions() == IndexOptions.DOCS_ONLY ? -1 : in.readVLong();
         final long sumDocFreq = in.readVLong();
         final int docCount = in.readVInt();
@@ -188,6 +192,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
         IOUtils.closeWhileHandlingException(indexIn, this);
       }
     }
+    //System.out.print("Dbg: " + (System.currentTimeMillis() - StartTime) + " ms: " + info.name + ": BlockTreeTermsReader: const: end\r\n");
   }
 
   /** Reads terms file header. */
@@ -245,8 +250,12 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
   @Override
   public Terms terms(String field) throws IOException {
+    //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": BlockTreeTermsReader: terms: start " + field + "\r\n");
+    Terms retVal = null;
     assert field != null;
-    return fields.get(field);
+    retVal = fields.get(field);
+    //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": BlockTreeTermsReader: terms: end " + field + "\r\n");
+    return retVal;
   }
 
   @Override
@@ -459,6 +468,8 @@ public class BlockTreeTermsReader extends FieldsProducer {
     //private boolean DEBUG;
 
     FieldReader(FieldInfo fieldInfo, long numTerms, BytesRef rootCode, long sumTotalTermFreq, long sumDocFreq, int docCount, long indexStartFP, IndexInput indexIn) throws IOException {
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": FieldReader: cons: start\r\n");
+
       assert numTerms > 0;
       this.fieldInfo = fieldInfo;
       //DEBUG = BlockTreeTermsReader.DEBUG && fieldInfo.name.equals("id");
@@ -492,6 +503,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
       } else {
         index = null;
       }
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": FieldReader: cons: end\r\n");
     }
 
     /** For debugging -- used by CheckIndex too*/
@@ -527,7 +539,10 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
     @Override
     public TermsEnum iterator(TermsEnum reuse) throws IOException {
-      return new SegmentTermsEnum();
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": FieldReader: iterator: start " + reuse + "\r\n");
+      TermsEnum retVal = new SegmentTermsEnum();
+      //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": FieldReader: iterator: end " + reuse + "\r\n");
+      return retVal;
     }
 
     @Override
@@ -826,6 +841,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
       // TODO: in some cases we can filter by length?  eg
       // regexp foo*bar must be at least length 6 bytes
       public IntersectEnum(CompiledAutomaton compiled, BytesRef startTerm) throws IOException {
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: cons: start\r\n");
         // if (DEBUG) {
         //   System.out.println("\nintEnum.init seg=" + segment + " commonSuffix=" + brToString(compiled.commonSuffixRef));
         // }
@@ -873,6 +889,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
         if (startTerm != null) {
           seekToStartTerm(startTerm);
         }
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: cons: end\r\n");
       }
 
       // only for assert:
@@ -968,8 +985,11 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
       @Override
       public DocsEnum docs(Bits skipDocs, DocsEnum reuse, int flags) throws IOException {
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: docs: start " + term().utf8ToString() + "\r\n");
         currentFrame.decodeMetaData();
-        return postingsReader.docs(fieldInfo, currentFrame.termState, skipDocs, reuse, flags);
+        DocsEnum retVal = postingsReader.docs(fieldInfo, currentFrame.termState, skipDocs, reuse, flags);
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: docs: end " + term().utf8ToString() + "\r\n");
+        return retVal;
       }
 
       @Override
@@ -979,8 +999,11 @@ public class BlockTreeTermsReader extends FieldsProducer {
           return null;
         }
 
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: docsAndPositions: start\r\n");
         currentFrame.decodeMetaData();
-        return postingsReader.docsAndPositions(fieldInfo, currentFrame.termState, skipDocs, reuse, flags);
+        DocsAndPositionsEnum retVal = postingsReader.docsAndPositions(fieldInfo, currentFrame.termState, skipDocs, reuse, flags);
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: docsAndPositions: start\r\n");
+        return retVal;
       }
 
       private int getState() {
@@ -1073,6 +1096,8 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
       @Override
       public BytesRef next() throws IOException {
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: next: start\r\n");
+        BytesRef retVal = null;
 
         // if (DEBUG) {
         //   System.out.println("\nintEnum.next seg=" + segment);
@@ -1090,10 +1115,12 @@ public class BlockTreeTermsReader extends FieldsProducer {
             } else {
               //if (DEBUG) System.out.println("  pop frame");
               if (currentFrame.ord == 0) {
-                return null;
+                //return null;
+                retVal = null;
+                break nextTerm;
               }
               final long lastFP = currentFrame.fpOrig;
-              currentFrame = stack[currentFrame.ord-1];
+              currentFrame = stack[currentFrame.ord - 1];
               assert currentFrame.lastSubFP == lastFP;
               //if (DEBUG) System.out.println("\n  frame ord=" + currentFrame.ord + " prefix=" + brToString(new BytesRef(term.bytes, term.offset, currentFrame.prefix)) + " state=" + currentFrame.state + " lastInFloor?=" + currentFrame.isLastInFloor + " fp=" + currentFrame.fp + " trans=" + (currentFrame.transitions.length == 0 ? "n/a" : currentFrame.transitions[currentFrame.transitionIndex]) + " outputPrefix=" + currentFrame.outputPrefix);
             }
@@ -1111,7 +1138,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
           if (currentFrame.suffix != 0) {
             final int label = currentFrame.suffixBytes[currentFrame.startBytePos] & 0xff;
             while (label > currentFrame.curTransitionMax) {
-              if (currentFrame.transitionIndex >= currentFrame.transitions.length-1) {
+              if (currentFrame.transitionIndex >= currentFrame.transitions.length - 1) {
                 // Stop processing this frame -- no further
                 // matches are possible because we've moved
                 // beyond what the max transition will allow
@@ -1188,8 +1215,8 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
           // See if the term prefix matches the automaton:
           int state = currentFrame.state;
-          for (int idx=0;idx<currentFrame.suffix;idx++) {
-            state = runAutomaton.step(state,  currentFrame.suffixBytes[currentFrame.startBytePos+idx] & 0xff);
+          for (int idx = 0; idx < currentFrame.suffix; idx++) {
+            state = runAutomaton.step(state, currentFrame.suffixBytes[currentFrame.startBytePos + idx] & 0xff);
             if (state == -1) {
               // No match
               //System.out.println("    no s=" + state);
@@ -1208,12 +1235,16 @@ public class BlockTreeTermsReader extends FieldsProducer {
           } else if (runAutomaton.isAccept(state)) {
             copyTerm();
             //if (DEBUG) System.out.println("      term match to state=" + state + "; return term=" + brToString(term));
-            assert savedStartTerm == null || term.compareTo(savedStartTerm) > 0: "saveStartTerm=" + savedStartTerm.utf8ToString() + " term=" + term.utf8ToString();
-            return term;
+            assert savedStartTerm == null || term.compareTo(savedStartTerm) > 0 : "saveStartTerm=" + savedStartTerm.utf8ToString() + " term=" + term.utf8ToString();
+            //return term;
+            retVal = term;
+            break nextTerm;
           } else {
             //System.out.println("    no s=" + state);
           }
         }
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": IntersectEnum: next: end\r\n");
+        return retVal;
       }
 
       private void copyTerm() {
@@ -1278,6 +1309,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
           new FST.Arc[1];
 
       public SegmentTermsEnum() throws IOException {
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: cons: start\r\n");
         //if (DEBUG) System.out.println("BTTR.init seg=" + segment);
         stack = new Frame[0];
         
@@ -1316,6 +1348,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
         //System.out.println();
         // computeBlockStats().print(System.out);
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: cons: end\r\n");
       }
       
       // Not private to avoid synthetic access$NNN methods
@@ -1510,6 +1543,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
       @Override
       public boolean seekExact(final BytesRef target) throws IOException {
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: start " + target.utf8ToString() + "\r\n");
 
         if (index == null) {
           throw new IllegalStateException("terms index was not loaded");
@@ -1635,6 +1669,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
               // if (DEBUG) {
               //   System.out.println("  target is same as current; return true");
               // }
+              //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: end " + target.utf8ToString() + "\r\n");
               return true;
             } else {
               // if (DEBUG) {
@@ -1697,6 +1732,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
               // if (DEBUG) {
               //   System.out.println("  FAST NOT_FOUND term=" + brToString(term));
               // }
+              //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: end " + target.utf8ToString() + "\r\n");
               return false;
             }
 
@@ -1707,11 +1743,13 @@ public class BlockTreeTermsReader extends FieldsProducer {
               // if (DEBUG) {
               //   System.out.println("  return FOUND term=" + term.utf8ToString() + " " + term);
               // }
+              System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: end " + target.utf8ToString() + "\r\n");
               return true;
             } else {
               // if (DEBUG) {
               //   System.out.println("  got " + result + "; return NOT_FOUND term=" + brToString(term));
               // }
+              //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: end " + target.utf8ToString() + "\r\n");
               return false;
             }
           } else {
@@ -1748,6 +1786,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
           // if (DEBUG) {
           //   System.out.println("  FAST NOT_FOUND term=" + brToString(term));
           // }
+          //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: end " + target.utf8ToString() + "\r\n");
           return false;
         }
 
@@ -1758,12 +1797,14 @@ public class BlockTreeTermsReader extends FieldsProducer {
           // if (DEBUG) {
           //   System.out.println("  return FOUND term=" + term.utf8ToString() + " " + term);
           // }
+          //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: end " + target.utf8ToString() + "\r\n");
           return true;
         } else {
           // if (DEBUG) {
           //   System.out.println("  got result " + result + "; return NOT_FOUND term=" + term.utf8ToString());
           // }
 
+          //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekExact: end " + target.utf8ToString() + "\r\n");
           return false;
         }
       }
@@ -1773,7 +1814,8 @@ public class BlockTreeTermsReader extends FieldsProducer {
         if (index == null) {
           throw new IllegalStateException("terms index was not loaded");
         }
-   
+
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: start " + target.utf8ToString() + "\r\n");
         if (term.bytes.length <= target.length) {
           term.bytes = ArrayUtil.grow(term.bytes, 1+target.length);
         }
@@ -1894,6 +1936,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
               //if (DEBUG) {
               //System.out.println("  target is same as current; return FOUND");
               //}
+              //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: end " + target.utf8ToString() + "\r\n");
               return SeekStatus.FOUND;
             } else {
               //if (DEBUG) {
@@ -1957,17 +2000,20 @@ public class BlockTreeTermsReader extends FieldsProducer {
                 //if (DEBUG) {
                 //System.out.println("  return NOT_FOUND term=" + brToString(term) + " " + term);
                 //}
+                //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: end " + target.utf8ToString() + "\r\n");
                 return SeekStatus.NOT_FOUND;
               } else {
                 //if (DEBUG) {
                 //System.out.println("  return END");
                 //}
+                //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: end " + target.utf8ToString() + "\r\n");
                 return SeekStatus.END;
               }
             } else {
               //if (DEBUG) {
               //System.out.println("  return " + result + " term=" + brToString(term) + " " + term);
               //}
+              //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: end " + target.utf8ToString() + "\r\n");
               return result;
             }
           } else {
@@ -2009,14 +2055,17 @@ public class BlockTreeTermsReader extends FieldsProducer {
             //if (DEBUG) {
             //System.out.println("  return NOT_FOUND term=" + term.utf8ToString() + " " + term);
             //}
+            //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: end " + target.utf8ToString() + "\r\n");
             return SeekStatus.NOT_FOUND;
           } else {
             //if (DEBUG) {
             //System.out.println("  return END");
             //}
+            //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: end " + target.utf8ToString() + "\r\n");
             return SeekStatus.END;
           }
         } else {
+          //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: seekCeil: end " + target.utf8ToString() + "\r\n");
           return result;
         }
       }
@@ -2074,6 +2123,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
          decode all metadata up to the current term. */
       @Override
       public BytesRef next() throws IOException {
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: next: start\r\n");
 
         if (in == null) {
           // Fresh TermsEnum; seek to first term:
@@ -2122,6 +2172,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
               validIndexPrefix = 0;
               currentFrame.rewind();
               termExists = false;
+              //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: next: end\r\n");
               return null;
             }
             final long lastFP = currentFrame.fpOrig;
@@ -2157,6 +2208,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
             currentFrame.loadBlock();
           } else {
             //if (DEBUG) System.out.println("  return term=" + term.utf8ToString() + " " + term + " currentFrame.ord=" + currentFrame.ord);
+            //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: next: end\r\n");
             return term;
           }
         }
@@ -2186,6 +2238,7 @@ public class BlockTreeTermsReader extends FieldsProducer {
 
       @Override
       public DocsEnum docs(Bits skipDocs, DocsEnum reuse, int flags) throws IOException {
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: docs: start " + term().utf8ToString() + "\r\n");
         assert !eof;
         //if (DEBUG) {
         //System.out.println("BTTR.docs seg=" + segment);
@@ -2194,7 +2247,9 @@ public class BlockTreeTermsReader extends FieldsProducer {
         //if (DEBUG) {
         //System.out.println("  state=" + currentFrame.state);
         //}
-        return postingsReader.docs(fieldInfo, currentFrame.state, skipDocs, reuse, flags);
+        DocsEnum retVal = postingsReader.docs(fieldInfo, currentFrame.state, skipDocs, reuse, flags);
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: docs: end " + term().utf8ToString() + "\r\n");
+        return retVal;
       }
 
       @Override
@@ -2204,9 +2259,12 @@ public class BlockTreeTermsReader extends FieldsProducer {
           return null;
         }
 
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: docsAndPositions: start " + term().utf8ToString() + "\r\n");
         assert !eof;
         currentFrame.decodeMetaData();
-        return postingsReader.docsAndPositions(fieldInfo, currentFrame.state, skipDocs, reuse, flags);
+        DocsAndPositionsEnum retVal = postingsReader.docsAndPositions(fieldInfo, currentFrame.state, skipDocs, reuse, flags);
+        //System.out.print("Dbg: " + (System.currentTimeMillis()-StartTime) + " ms: " + segmentName + ": SegmentTermsEnum: docsAndPositions: end " + term().utf8ToString() + "\r\n");
+        return retVal;
       }
 
       @Override

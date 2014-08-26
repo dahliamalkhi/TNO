@@ -139,9 +139,9 @@ public class SecureCipherUtil {
   public static void deleteKey() {
     //SecureCipherUtil.key = null;
     //SecureCipherUtil.keys = null;
-    //System.out.println();
-    //System.out.println("DBG: SECURECIPHERUTIL: deleted all keys");
-    //System.out.println();
+    System.out.println();
+    System.out.println("DBG: SECURECIPHERUTIL: deleted all keys");
+    System.out.println();
   }
 
   public static void deleteKey(String field)

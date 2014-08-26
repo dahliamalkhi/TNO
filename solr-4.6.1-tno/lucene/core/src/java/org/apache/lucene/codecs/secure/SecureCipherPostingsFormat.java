@@ -17,11 +17,18 @@ package org.apache.lucene.codecs.secure;
  * limitations under the License.
  */
 
+import org.apache.lucene.codecs.BlockTreeTermsReader;
+import org.apache.lucene.codecs.BlockTreeTermsWriter;
 import org.apache.lucene.codecs.FieldsConsumer;
 import org.apache.lucene.codecs.FieldsProducer;
+import org.apache.lucene.codecs.PostingsReaderBase;
+import org.apache.lucene.codecs.PostingsWriterBase;
+import org.apache.lucene.codecs.lucene41.Lucene41PostingsReader;
+import org.apache.lucene.codecs.lucene41.Lucene41PostingsWriter;
 import org.apache.lucene.index.IndexFileNames;
 import org.apache.lucene.index.SegmentReadState;
 import org.apache.lucene.index.SegmentWriteState;
+import org.apache.lucene.util.IOUtils;
 
 import java.io.IOException;
 
@@ -41,12 +48,49 @@ public final class SecureCipherPostingsFormat extends SecurePostingsFormat {
 
   @Override
   public FieldsConsumer fieldsConsumer(SegmentWriteState state) throws IOException {
-    return new SecureCipherFieldsWriter(state);
+    //return new SecureCipherFieldsWriter(state);
+
+    PostingsWriterBase postingsWriter = new SecureCipherPostingsWriter(state);
+    boolean success = false;
+    try {
+      FieldsConsumer ret = new BlockTreeTermsWriter(state,
+          postingsWriter,
+          BlockTreeTermsWriter.DEFAULT_MIN_BLOCK_SIZE,
+          BlockTreeTermsWriter.DEFAULT_MAX_BLOCK_SIZE);
+      success = true;
+      return ret;
+    } finally {
+      if (!success) {
+        IOUtils.closeWhileHandlingException(postingsWriter);
+      }
+    }
   }
 
   @Override
   public FieldsProducer fieldsProducer(SegmentReadState state) throws IOException {
-    return new SecureCipherFieldsReader(state);
+    //return new SecureCipherFieldsReader(state);
+
+    PostingsReaderBase postingsReader = new SecureCipherPostingsReader(state.directory,
+        state.fieldInfos,
+        state.segmentInfo,
+        state.context,
+        state.segmentSuffix);
+    boolean success = false;
+    try {
+      FieldsProducer ret = new BlockTreeTermsReader(state.directory,
+          state.fieldInfos,
+          state.segmentInfo,
+          postingsReader,
+          state.context,
+          state.segmentSuffix,
+          state.termsIndexDivisor);
+      success = true;
+      return ret;
+    } finally {
+      if (!success) {
+        IOUtils.closeWhileHandlingException(postingsReader);
+      }
+    }
   }
 
   /** Extension of freq postings file */

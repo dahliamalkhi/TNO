@@ -30,19 +30,16 @@ import org.apache.lucene.util.BytesRef;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 
-class SecureCipherFieldsWriter extends FieldsConsumer {
+class SecureCipherOldFieldsWriter extends FieldsConsumer {
 
 //  private final IndexOutput keyOut;
   //private final IndexOutput out;
   private final SecureCipherIndexOutput out;
   private CollectionHeader header = null;
   private int fieldCount = 0;
-
-  public ArrayList<FieldHeader> fieldHeaders = new ArrayList<FieldHeader>();
 
   final static byte[] COLLECTION   = "Collection".getBytes();
   final static byte[] FIELD        = "Field".getBytes();
@@ -51,8 +48,7 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
   final static class CollectionHeader {
     byte[] preamble = COLLECTION;
     int fieldCount = 0;
-    long startFP = -1;
-    long fieldsFP = -1;
+    long finishFP = 0;
 
     CollectionHeader () {
     }
@@ -67,82 +63,80 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
       assert Arrays.equals(buf, this.preamble);
 
       fieldCount = in.readInt();
-      fieldsFP = in.readLong();
     }
 
     void write(IndexOutput out) throws IOException {
       out.writeBytes(preamble, preamble.length);
-      startFP = out.getFilePointer();
+      finishFP = out.getFilePointer();
       out.writeInt(fieldCount);
-      out.writeLong(fieldsFP);
     }
 
-    void finish(IndexOutput out, int fieldCount, long fieldsFP) throws IOException {
+    void finish(IndexOutput out, int fieldCount) throws IOException {
       long finish = out.getFilePointer();
-      assert(startFP != 0);
-      out.seek(startFP);
+      assert(finishFP != 0);
+      out.seek(finishFP);
       out.writeInt(fieldCount);
-      out.writeLong(fieldsFP);
       out.seek(finish);
     }
   }
 
   final static class FieldHeader {
-    //byte[] preamble = FIELD;
+    byte[] preamble = FIELD;
     String name;
     int termCount = 0;
     int docCount = 0;
     long sumDocFreq = 0;
     long sumTotalTermFreq = 0;
-    long termsFP = -1;
+    long next = 0;
+    long finishFP = 0;
 
     FieldHeader (String name) {
       this.name = name;
     }
 
     FieldHeader (IndexInput in) throws IOException {
-      this.readHeader(in);
+      this.read(in);
     }
 
     void read(IndexInput in) throws IOException {
-//      byte[] buf = new byte[this.preamble.length];
-//      in.readBytes(buf, 0, this.preamble.length);
-//      assert Arrays.equals(buf, this.preamble);
-    }
+      byte[] buf = new byte[this.preamble.length];
+      in.readBytes(buf, 0, this.preamble.length);
+      assert Arrays.equals(buf, this.preamble);
 
-    void write(IndexOutput out) throws IOException {
-      //out.writeBytes(preamble, preamble.length);
-    }
-
-    void finish(IndexOutput out, int termCount, int docCount, long sumDocFreq, long sumTotalTermFreq, long termsFP) throws IOException {
-      this.termCount = termCount;
-      this.docCount = docCount;
-      this.sumDocFreq = sumDocFreq;
-      this.sumTotalTermFreq = sumTotalTermFreq;
-      this.termsFP = termsFP;
-    }
-
-    void readHeader(IndexInput in) throws IOException {
       int len = in.readInt();
-      byte[] buf = new byte[len];
+      buf = new byte[len];
       in.readBytes(buf, 0, len);
       this.name = new String(buf, "UTF-8");
       this.termCount = in.readInt();
       this.docCount = in.readInt();
       this.sumDocFreq = in.readLong();
       this.sumTotalTermFreq = in.readLong();
-      this.termsFP = in.readLong();
+      this.next = in.readLong();
     }
 
-    void writeHeader(IndexOutput out) throws IOException {
+    void write(IndexOutput out) throws IOException {
+      out.writeBytes(preamble, preamble.length);
       byte[] buf = name.getBytes("UTF-8");
       out.writeInt(buf.length);
       out.writeBytes(buf, buf.length);
+      finishFP = out.getFilePointer();
       out.writeInt(termCount);
       out.writeInt(docCount);
       out.writeLong(sumDocFreq);
       out.writeLong(sumTotalTermFreq);
-      out.writeLong(termsFP);
+      out.writeLong(next);
+    }
+
+    void finish(IndexOutput out, int termCount, int docCount, long sumDocFreq, long sumTotalTermFreq) throws IOException {
+      next = out.getFilePointer();
+      assert(finishFP != 0);
+      out.seek(finishFP);
+      out.writeInt(termCount);
+      out.writeInt(docCount);
+      out.writeLong(sumDocFreq);
+      out.writeLong(sumTotalTermFreq);
+      out.writeLong(next);
+      out.seek(next);
     }
   }
 
@@ -151,7 +145,8 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
     byte[] name;
     int docFreq;
     long totalTermFreq;
-    long startFP = -1;
+    long next = 0;
+    long nextFP = 0;
 
     TermHeader (BytesRef name) {
       this.name = new byte[name.length];
@@ -159,40 +154,40 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
     }
 
     TermHeader (IndexInput in) throws IOException {
-      this.readHeader(in);
+      this.read(in);
     }
 
     void read(IndexInput in) throws IOException {
-//      byte[] buf = new byte[this.preamble.length];
-//      in.readBytes(buf, 0, this.preamble.length);
-//      assert Arrays.equals(buf, this.preamble);
-    }
+      byte[] buf = new byte[this.preamble.length];
+      in.readBytes(buf, 0, this.preamble.length);
+      assert Arrays.equals(buf, this.preamble);
 
-    void write(IndexOutput out) throws IOException {
-      startFP = out.getFilePointer();
-      //out.writeBytes(preamble, preamble.length);
-    }
-
-    void finish(IndexOutput out, int docFreq, long totalTermFreq) throws IOException {
-      this.docFreq = docFreq;
-      this.totalTermFreq = totalTermFreq;
-    }
-
-    void readHeader(IndexInput in) throws IOException {
       int len = in.readInt();
       this.name = new byte[len];
       in.readBytes(this.name, 0, len);
       this.docFreq = in.readInt();
       this.totalTermFreq = in.readLong();
-      this.startFP = in.readLong();
+      this.next = in.readLong();
     }
 
-    void writeHeader(IndexOutput out) throws IOException {
+    void write(IndexOutput out) throws IOException {
+      out.writeBytes(preamble, preamble.length);
       out.writeInt(name.length);
       out.writeBytes(name, name.length);
+      nextFP = out.getFilePointer();
       out.writeInt(docFreq);
       out.writeLong(totalTermFreq);
-      out.writeLong(startFP);
+      out.writeLong(next);
+    }
+
+    void finish(IndexOutput out, int docFreq, long totalTermFreq) throws IOException {
+      next = out.getFilePointer();
+      assert(nextFP != 0);
+      out.seek(nextFP);
+      out.writeInt(docFreq);
+      out.writeLong(totalTermFreq);
+      out.writeLong(next);
+      out.seek(next);
     }
   }
 
@@ -277,7 +272,7 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
     }
   }
 
-  public SecureCipherFieldsWriter(SegmentWriteState state) throws IOException {
+  public SecureCipherOldFieldsWriter(SegmentWriteState state) throws IOException {
     final String fileName = SecureSimpleTextPostingsFormat.getPostingsFileName(state.segmentInfo.name, state.segmentSuffix);
     IndexOutput inner_out = state.directory.createOutput(fileName, state.context);
     //out = inner_out;
@@ -300,14 +295,11 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
     return new SecureCipherTermsWriter(field);
   }
 
+
   @Override
   public void close() throws IOException {
     try {
-      long fieldsFP = out.getFilePointer();
-      for (FieldHeader field : fieldHeaders) {
-        field.writeHeader(out);
-      }
-      header.finish(out, fieldCount, fieldsFP);
+      header.finish(out, fieldCount);
     } finally {
       out.close();
     }
@@ -339,13 +331,9 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
 
     @Override
     public void finish(long sumTotalTermFreq, long sumDocFreq, int docCount) throws IOException {
-      long termsFP = out.getFilePointer();
-      for (TermHeader term : postingsWriter.termHeaders) {
-        term.writeHeader(out);
-      }
-      fieldHeader.finish(out, termCount, docCount, sumDocFreq, sumTotalTermFreq < 0 ? 0 : sumTotalTermFreq, termsFP);
-      fieldHeaders.add(fieldHeader);
+//      postingsWriter.reset(null);
       //out.endEncryption();
+      fieldHeader.finish(out, termCount, docCount, sumDocFreq, sumTotalTermFreq < 0 ? 0 : sumTotalTermFreq);
     }
 
     @Override
@@ -353,21 +341,19 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
   }
 
   private class SecureCipherPostingsWriter extends PostingsConsumer {
-    private TermHeader termHeader;
+    private TermHeader term;
     private boolean wroteTerm;
-
-    private final boolean writeTermDocFreqs;
-    private final boolean writePositions;
-    private final boolean writeOffsets;
     private SecretKey fieldKey;
 
     private DocsAndFreqsAndPositionsTermValue termValue;
 
+    private final boolean writeTermDocFreqs;
+    private final boolean writePositions;
+    private final boolean writeOffsets;
+
     // for assert:
     private int lastStartOffset = 0;
     private int docCount = 0;
-
-    public ArrayList<TermHeader> termHeaders = new ArrayList<TermHeader>();
 
     public SecureCipherPostingsWriter(FieldInfo field) {
       IndexOptions indexOptions = field.getIndexOptions();
@@ -384,16 +370,19 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
 
     @Override
     public void startDoc(int docID, int termDocFreq) throws IOException {
-      if (!wroteTerm) {
-        termHeader.write(out);
+      if (!this.wroteTerm) {
+        this.term.write(out);
         out.startEncryption(fieldKey);
-        wroteTerm = true;
+        this.wroteTerm = true;
       }
 
       if (this.writePositions) {
-        termValue = new DocsAndFreqsAndPositionsTermValue(docID, termDocFreq);
-        termValue.write(out);
-      } else if (writeTermDocFreqs) {
+//        if (this.termValue != null) {
+//          this.termValue.finish(out);
+//        }
+        this.termValue = new DocsAndFreqsAndPositionsTermValue(docID, termDocFreq);
+        this.termValue.write(out);
+      } else if (this.writeTermDocFreqs) {
         new DocsAndFreqsTermValue(docID, termDocFreq).write(out);
       } else {
         new DocsOnlyTermValue(docID).write(out);
@@ -403,37 +392,35 @@ class SecureCipherFieldsWriter extends FieldsConsumer {
     }
 
     public PostingsConsumer startTerm(BytesRef term) throws IOException {
-      termHeader = new TermHeader(term);
-      wroteTerm = false;
-      termValue = null;
-      docCount = 0;
+      this.term = new TermHeader(term);
+      this.wroteTerm = false;
+      this.termValue = null;
+      this.docCount = 0;
       return this;
     }
 
     public boolean finishTerm(BytesRef term, TermStats stats) throws IOException {
-      assert Arrays.equals(term.bytes, termHeader.name);
+      assert Arrays.equals(term.bytes, this.term.name);
       assert stats.docFreq == docCount;
 
-      boolean retVal = false;
-      if (wroteTerm) {
+      boolean wroteTerm = this.wroteTerm;
+      if (this.wroteTerm) {
         out.endEncryption();
-        termHeader.finish(out, stats.docFreq, stats.totalTermFreq < 0 ? 0 : stats.totalTermFreq);
-        termHeaders.add(this.termHeader);
-        retVal = true;
+        this.term.finish(out, stats.docFreq, stats.totalTermFreq < 0 ? 0 : stats.totalTermFreq);
       }
-      wroteTerm = false;
-      termValue = null;
-      docCount = 0;
-      return retVal;
+      this.wroteTerm = false;
+      this.termValue = null;
+      this.docCount = 0;
+      return wroteTerm;
     }
 
     @Override
     public void addPosition(int position, BytesRef payload, int startOffset, int endOffset) throws IOException {
-      if (writePositions) {
+      if (this.writePositions) {
         out.writeInt(position);
       }
 
-      if (writeOffsets) {
+      if (this.writeOffsets) {
         assert endOffset >= startOffset;
         assert startOffset >= lastStartOffset : "startOffset=" + startOffset + " lastStartOffset=" + lastStartOffset;
         lastStartOffset = startOffset;
