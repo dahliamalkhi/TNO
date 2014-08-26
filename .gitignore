@@ -2,16 +2,31 @@
 *.class
 *.war
 
+# We don't check in unpacked dependencies
+dependencies/java/*/unpacked
+
 # We don't check in build products
+solr-4.6.1/lucene/build
+solr-4.6.1/solr/build
+solr-4.6.1/solr/dist
 solr-4.6.1-tno/lucene/build
 solr-4.6.1-tno/solr/build
 solr-4.6.1-tno/solr/dist
 
 # We don't check in state from running demos and tests
-solr-4.6.1-tno/solr/example/logs
-solr-4.6.1-tno/solr/example/solr/collection1/data
-demo/advisor/solr_deployment/logs
-demo/advisor/solr_deployment/solr/collection1/data
+solr-4.6.1-tno/solr/example/logs*
+solr-4.6.1-tno/solr/example/solr/collection1/data*
+demo/advisor/solr_deployment/logs*
+demo/advisor/solr_deployment/solr/collection1/data*
+demo/advisor/temp_files_to_ingest.txt
+
+# We don't check in test results in the dir they are created in...
+# (copy them under /experiments dir)
+demo/advisor/stdout.*
+demo/advisor/query_output/*
+
+# (Currently, SecureCipherUtil.Keys.txt is checked in, to give well-known keys)
+#SecureCipherUtil.Keys.txt
 
 # Created by http://www.gitignore.io
 ### Intellij ###
