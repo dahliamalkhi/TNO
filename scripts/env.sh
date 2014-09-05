@@ -26,14 +26,16 @@ if [[ "${HOST}" == "TNO-Scale-Test1" ]]; then
   SOLR_SERVER_HOSTNAME=localhost
   SOLR_SERVER_PORT=":8983"
 elif [[ "${HOST}" == "TNO-Scale-Test2" ]]; then
-  SOLR_SERVER_HOSTNAME=tno-scale-test1.cloudapp.net
+#  SOLR_SERVER_HOSTNAME=tno-scale-test2.cloudapp.net
+  SOLR_SERVER_HOSTNAME=localhost
   SOLR_SERVER_PORT=":8983"
   DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 elif [[ "${HOST}" == "TNO-Scale-Test3" ]]; then
   SOLR_SERVER_HOSTNAME=localhost
   SOLR_SERVER_PORT=":8983"
 elif [[ "${HOST}" == "TNO-Scale-Test4" ]]; then
-  SOLR_SERVER_HOSTNAME=tno-scale-test3.cloudapp.net
+#  SOLR_SERVER_HOSTNAME=tno-scale-test4.cloudapp.net
+  SOLR_SERVER_HOSTNAME=localhost
   SOLR_SERVER_PORT=":8983"
   DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 elif [[ "${HOST}" == "TNO-Scale-Test5" ]]; then
@@ -41,7 +43,8 @@ elif [[ "${HOST}" == "TNO-Scale-Test5" ]]; then
   SOLR_SERVER_PORT=":8983"
 elif [[ "${HOST}" == "TNO-Scale-Test6" ]]; then
   # hostname 5a rather than 5 due to a DNS issue during provisioning.
-  SOLR_SERVER_HOSTNAME=tno-scale-test5a.cloudapp.net
+#  SOLR_SERVER_HOSTNAME=tno-scale-test5a.cloudapp.net
+  SOLR_SERVER_HOSTNAME=localhost
   SOLR_SERVER_PORT=":8983"
   DOCUMENT_SOURCE=/cygdrive/f/PerfHourly_200000_500
 else
