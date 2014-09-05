@@ -8,13 +8,11 @@
 source ../../scripts/env.sh
 
 COLLECTION_NAME=collection1
-SOLR_DIST_PATH=../../solr-4.6.1-tno/solr/dist
+SOLR_DIST_PATH=../../tno_build/solr/dist
 SOLR_DEPLOYMENT_PATH=solr_deployment
 
-# By default, use the schema which encrypts the MG field
-# 'vanilla' flag, below, overrides this if specified.
-# TODO: Move to reading which fields should be encrypted from a TNO config file.
-SCHEMA_FILE=schema.MG.xml
+# Schema file is now independent of whether TNO is present or not.
+SCHEMA_FILE=schema.advisor.xml
 
 # Two (optional) arguments
 # TODO: Make it so you can use them both at once
@@ -26,7 +24,6 @@ if [ "$#" -eq 1 ]; then
   elif [ "$1" == "vanilla" ]; then
     # 'vanilla' uses the vanilla Solr distribution, rather than the TNO version.
     SOLR_DIST_PATH=../../solr-4.6.1/solr/dist
-    SCHEMA_FILE=schema.vanilla.xml
   else
     echo "Only (optional) arguments are 'debug' and 'vanilla'. Exiting ..."
 	exit 1
@@ -35,7 +32,7 @@ fi
 
 # Copy selected schema XML file to conf/schema.xml
 rm -rf solr_deployment/solr/collection1/conf/schema.xml
-cp solr_deployment/solr/collection1/conf/${SCHEMA_FILE} solr_deployment/solr/collection1/conf/schema.xml
+cp solr_deployment/solr/collection1/conf/schemas/${SCHEMA_FILE} solr_deployment/solr/collection1/conf/schema.xml
 
 echo
 echo "**** Trust No One demo v1.1 ****"
@@ -44,6 +41,7 @@ echo
 echo Updating Solr WAR file...
 [ ! -d ${SOLR_DEPLOYMENT_PATH}/webapps ] && mkdir ${SOLR_DEPLOYMENT_PATH}/webapps
 echo Using Solr dist from ${SOLR_DIST_PATH}
+echo cp ${SOLR_DIST_PATH}/solr-4.6-SNAPSHOT.war ${SOLR_DEPLOYMENT_PATH}/webapps/solr.war
 cp ${SOLR_DIST_PATH}/solr-4.6-SNAPSHOT.war ${SOLR_DEPLOYMENT_PATH}/webapps/solr.war
 
 echo Deleting log files in example\logs...

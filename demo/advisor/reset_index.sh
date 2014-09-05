@@ -8,12 +8,19 @@
 source ../../scripts/env.sh
 
 COLLECTION_NAME=collection1
-SOLR_DIST_PATH=../../solr-4.6.1-tno/solr/dist
 SOLR_DEPLOYMENT_PATH=solr_deployment
 
+DATA_PATH=${SOLR_DEPLOYMENT_PATH}/solr/${COLLECTION_NAME}/data
+
+# (Unsuccessful) attempt to avoid Device or Resource Busy errors:
+# echo Deleting old indexes...
+# rm -rf ${DATA_PATH}.old
+# echo Moving existing indexes...
+# mv ${DATA_PATH} ${DATA_PATH}.old
+
 echo Deleting existing indexes...
-rm -rf ${SOLR_DEPLOYMENT_PATH}/solr/${COLLECTION_NAME}/data
+rm -rf ${DATA_PATH}
 
 #echo Deleting TNO keys file...
 #rm -f ${SOLR_DEPLOYMENT_PATH}/SecureCipherUtil.Keys.txt
-echo For now do NOT delete TNO keys file. Using well-known keys for simplicity of testing...
+#echo For now do NOT delete TNO keys file. Using well-known keys for simplicity of testing...

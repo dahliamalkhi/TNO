@@ -15,6 +15,12 @@ source ../../scripts/env.sh
 
 INPUT_FILE=$1
 POST_COMMENT=$2
+SHOULD_COMMIT=$3
+
+COMMIT_FLAGS=""
+if [ "${SHOULD_COMMIT}" == "COMMIT" ]; then
+  COMMIT_FLAGS="&commit=true"
+fi
 
 # Check that curl is installed
 if [ ! hash curl 2>/dev/null ]; then 
@@ -31,5 +37,4 @@ fi
 # For now, enumerate the field names to overcome the fact that the files all have 'Id' when 'id' is the required unique key.
 # TODO: Understand why this issue does not occur in the Advisor environment, which the CSV files come from.
 # -s -S Do not output progress info, but do report errors.
-curl -s -S --write-out "${POST_COMMENT},%{time_total},%{http_code},%{time_namelookup},%{time_connect},%{time_pretransfer},%{time_starttransfer}\n" --data-binary @${INPUT_FILE} -H 'Content-type:text/plain; charset=utf-8'  -o /dev/null "http://${SOLR_SERVER_HOSTNAME}:8983/solr/update/csv?header=false&skipLines=1&fieldnames=MG,ManagementGroupName,ObjectId,ObjectFullName,HealthServiceId,WorkflowName,WorkflowDisplayName,RuleId,ObjectName,CounterName,InstanceName,SampleValue,Min,Max,Percentile95,SampleCount,TimeGenerated,TenantId,RootObjectName,ObjectDisplayName,ObjectType,SourceSystem,id,Type"
-#&commit=true
+curl -s -S --write-out "${POST_COMMENT},%{time_total},%{http_code},%{time_namelookup},%{time_connect},%{time_pretransfer},%{time_starttransfer}\n" --data-binary @${INPUT_FILE} -H 'Content-type:text/plain; charset=utf-8'  -o /dev/null "http://${SOLR_SERVER_HOSTNAME}:8983/solr/update/csv?header=false&skipLines=1&fieldnames=MG,ManagementGroupName,ObjectId,ObjectFullName,HealthServiceId,WorkflowName,WorkflowDisplayName,RuleId,ObjectName,CounterName,InstanceName,SampleValue,Min,Max,Percentile95,SampleCount,TimeGenerated,TenantId,RootObjectName,ObjectDisplayName,ObjectType,SourceSystem,id,Type${COMMIT_FLAGS}"

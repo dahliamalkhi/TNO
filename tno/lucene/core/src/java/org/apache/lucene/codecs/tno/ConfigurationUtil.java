@@ -33,7 +33,8 @@ public class ConfigurationUtil {
    */
   static {
     encryptedFields = new ArrayList<String>(3);
-    encryptedFields.add("MG".toLowerCase());
+    // encryptedFields.add("MG".toLowerCase());
+    encryptedFields.add("ManagementGroupName".toLowerCase());
     encryptedFields.add("manu".toLowerCase());
     encryptedFields.add("manu_id_s".toLowerCase());
   }
