@@ -31,6 +31,7 @@ public class DataGenTool {
     private static final String DEFAULT_FIRST_DOC_NUMBER = "0";
     private static final String DEFAULT_NUM_DOCS = "500";
     private static final String DEFAULT_NUM_TERMS = "5000";
+    private static final String DEFAULT_NUM_SAMPLE_TERMS = "100";
 
     private static final String USAGE_STRING_SHORT =
             "Usage: java [SystemProperties] -jar datagen.jar ";
@@ -161,7 +162,7 @@ public class DataGenTool {
     private void outputTermsToQuery() {
         // TODO Make these properties configurable.
         final String fieldToQuery = "ManagementGroupName";
-        final int numTermsToOutput = 30;
+        final int numTermsToOutput = Integer.parseInt(DEFAULT_NUM_SAMPLE_TERMS);
 
         // For now, just pick requested number of terms from the set of used terms.
         // Don't enforce uniqueness.
