@@ -88,8 +88,8 @@ public class DataGenTool {
 
     private Map<Integer, String> m_guidNumberToStringMap;
     private Map<String,Map<Integer, String>> m_fieldNameToTermNumberToTermStringMap;
-    private Random m_termGenerator;
     private Random m_termStringGenerator;
+    private Random m_docNumberGenerator;
 
     // Input arguments.
     int m_firstDocNumber;
@@ -145,7 +145,7 @@ public class DataGenTool {
     private void outputDoc(int docNum) {
         // For now at least, we use the same term number for all fields in a given document.
         // TODO: Review this choice.
-        int termNumber = getNextTermNumber(docNum);
+        int termNumber = getTermNumber(docNum);
 
         int fieldIndex = 0;
         boolean firstEntry = true;
@@ -162,28 +162,23 @@ public class DataGenTool {
     private void outputTermsToQuery() {
         // TODO Make these properties configurable.
         final String fieldToQuery = "ManagementGroupName";
+        final int fieldIndex = 1;
         final int numTermsToOutput = Integer.parseInt(DEFAULT_NUM_SAMPLE_TERMS);
 
-        // For now, just pick requested number of terms from the set of used terms.
-        // Don't enforce uniqueness.
-        Map<Integer,String> termsUsed = m_fieldNameToTermNumberToTermStringMap.get(fieldToQuery);
-        int numTermsUsed = termsUsed.size();
-        // TODO Make this more random?
-        int numOutput = 0;
-        int termsToSkip = m_termGenerator.nextInt(numTermsUsed);
-        while (numOutput < numTermsToOutput) {
-            for(String termString : termsUsed.values()) {
-                if (termsToSkip > 0) {
-                    termsToSkip--;
-                    continue;
-                }
-                System.err.println(termString);
-                numOutput++;
-                if (numOutput == numTermsToOutput) {
-                    break;
-                }
-                termsToSkip = m_termGenerator.nextInt(numTermsUsed);
-            }
+        // For now, just pick requested number of terms from the set of all terms added to the
+        // index at the point this latest set of docs has been ingested. Do not enforce uniqueness.
+        //
+        // Also for now, exploit the fact that each doc has a well-known term number associated
+        // with it. So pick terms indirectly by picking random doc numbers up to the number of
+        // docs at the point this latest set of docs has been ingested.
+        // (i.e. Do not restrict the picked terms to those that have been used in the current
+        // set of docs just generated - which could get from m_fieldNameToTermNumberToTermStringMap.get(fieldToQuery);)
+        int highestDocNumber = m_firstDocNumber + m_numDocs;
+        for (int i = 0; i < numTermsToOutput; i++) {
+            int docNumber = m_docNumberGenerator.nextInt(highestDocNumber);
+            int termNumber = getTermNumber(docNumber);
+            String termString = getTermString(fieldToQuery, fieldIndex, termNumber);
+            System.err.println(termString);
         }
     }
 
@@ -240,9 +235,8 @@ public class DataGenTool {
         return java.util.UUID.randomUUID().toString();
     }
 
-    private int getNextTermNumber(int docNumber) {
+    private int getTermNumber(int docNumber) {
         // TODO Implement different distributions. For now, just support round robin on doc number.
-        // return m_termGenerator.nextInt(m_numTerms) + 1;
         return docNumber % m_numTerms;
     }
 
@@ -253,7 +247,7 @@ public class DataGenTool {
      * where N is the length of the field name.
      *
      * The random number generator used to produce the random letters is seeded with:
-     *   (termNumber * number of fields in document) + field index in document
+     *   (termNumber * number of fields in each document) + field index in document
      *
      * @param fieldName
      * @param fieldIndex
@@ -341,11 +335,12 @@ public class DataGenTool {
         this.m_fieldNameToTermNumberToTermStringMap =
                 new HashMap<String, Map<Integer, String>>(s_fieldMetadata.size());
 
-        // For now at least, use one term per doc,
-        // and seed the sequence off of the first doc number in each use of the tool.
-        this.m_termGenerator = new Random(m_firstDocNumber);
-        // Seed the term string generator each time generate a term string.
+        // RNG for producing sequences of pseudo-random letters in term strings.
+        // Seed the generator each time generate a term string.
         this.m_termStringGenerator = new Random();
+        // RNG for producing sequence of doc numbers to pick terms for sample queries.
+        // Seed the generator off of the first doc number in each use of the tool.
+        this.m_docNumberGenerator = new Random(m_firstDocNumber);
     }
 
     public DataGenTool() {

@@ -7,20 +7,19 @@
 # Configure environment variables etc
 source ../../scripts/env.sh
 
-#MAX_DOCS=5000
-#DOCS_PER_ITERATION=1000
+usage() {
+  echo Usage: post_and_query.sh \<num terms\>
+}
 
-# 10 terms
-#NUM_TERMS=10
-# 10K terms
-#NUM_TERMS=10000
-# 1M terms
-#NUM_TERMS=1000000
-# 10M terms
-NUM_TERMS=10000000
+if [ "$#" -ne 1 ]; then
+  usage
+  exit 1
+fi
+
+NUM_TERMS=$1
+echo Running post_and_query.sh with numTerms = ${NUM_TERMS}
 
 DOCS_TO_QUERY="1 10 100 1000 10000 100000 1000000 2000000 3000000 4000000 5000000 6000000 7000000 8000000 9000000 10000000"
-#DOCS_TO_QUERY="10000 100000 1000000 2000000 3000000 4000000 5000000 6000000 7000000 8000000 9000000 10000000"
 MAX_DOCS_PER_POST=100000
 
 #QUERY="MG%3A%228347a770-14b0-400e-8881-3a5771d49f89%22%0A"

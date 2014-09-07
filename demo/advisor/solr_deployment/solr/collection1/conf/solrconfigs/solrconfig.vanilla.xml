@@ -129,6 +129,7 @@
        before upgrading to a newer version to avoid unnecessary reindexing.
   -->
   <codecFactory class="solr.SchemaCodecFactory"/>
+  <!-- TNO <codecFactory class="solr.TNOSchemaCodecFactory"/> -->
 
   <!-- To enable dynamic schema REST APIs, use the following for <schemaFactory>:
   
@@ -187,7 +188,7 @@
          Lucene will flush based on whichever limit is hit first.
          The default is 100 MB.  -->
     <!-- <ramBufferSizeMB>100</ramBufferSizeMB> -->
-    <!-- <maxBufferedDocs>1000</maxBufferedDocs> -->
+    <maxBufferedDocs>50000</maxBufferedDocs> <!-- TNO uncommented and changed from 1000 -->
 
     <!-- Expert: Merge Policy 
          The Merge Policy in Lucene controls how merging of segments is done.
@@ -195,12 +196,13 @@
          The default since Lucene 2.3 was the LogByteSizeMergePolicy,
          Even older versions of Lucene used LogDocMergePolicy.
       -->
-    <!--
+    <!-- TNO uncommented -->
         <mergePolicy class="org.apache.lucene.index.TieredMergePolicy">
           <int name="maxMergeAtOnce">10</int>
           <int name="segmentsPerTier">10</int>
+		  <int name="maxMergedSegmentMB">100</int> <!-- TNO added -->
         </mergePolicy>
-      -->
+     
        
     <!-- Merge Factor
          The merge factor controls how many segments will get merged at a time.
@@ -368,7 +370,9 @@
          have some sort of hard autoCommit to limit the log size.
       -->
      <autoCommit> 
-       <maxTime>${solr.autoCommit.maxTime:15000}</maxTime> 
+        <maxDocs>50000</maxDocs> <!-- TNO added -->
+<!-- TNO changed       <maxTime>${solr.autoCommit.maxTime:15000}</maxTime> -->
+       <maxTime>30000</maxTime> 
        <openSearcher>false</openSearcher> 
      </autoCommit>
 
@@ -379,7 +383,8 @@
       -->
 
      <autoSoftCommit> 
-       <maxTime>${solr.autoSoftCommit.maxTime:-1}</maxTime> 
+<!-- TNO changed       <maxTime>${solr.autoSoftCommit.maxTime:-1}</maxTime> -->
+       <maxTime>180000</maxTime> 
      </autoSoftCommit>
 
     <!-- Update Related Event Listeners
@@ -1521,14 +1526,17 @@
        results for a given query regardless of the normal lucene
        scoring.
     -->
-  <searchComponent name="elevator" class="solr.QueryElevationComponent" >
+	<!-- TNO Comment out query elevator to avoid Invalid UUID exception as per 
+	         http://stackoverflow.com/questions/21736564/solr-uniquekey-with-solr-uuidfield
+			 
+  <searchComponent name="elevator" class="solr.QueryElevationComponent" > -->
     <!-- pick a fieldType to analyze queries -->
-    <str name="queryFieldType">string</str>
+<!--    <str name="queryFieldType">string</str>
     <str name="config-file">elevate.xml</str>
   </searchComponent>
-
+-->
   <!-- A request handler for demonstrating the elevator component -->
-  <requestHandler name="/elevate" class="solr.SearchHandler" startup="lazy">
+<!--  <requestHandler name="/elevate" class="solr.SearchHandler" startup="lazy">
     <lst name="defaults">
       <str name="echoParams">explicit</str>
       <str name="df">text</str>
@@ -1537,6 +1545,7 @@
       <str>elevator</str>
     </arr>
   </requestHandler>
+-->
 
   <!-- Highlighting Component
 
