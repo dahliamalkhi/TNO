@@ -31,7 +31,7 @@ public class DataGenTool {
     private static final String DEFAULT_FIRST_DOC_NUMBER = "0";
     private static final String DEFAULT_NUM_DOCS = "500";
     private static final String DEFAULT_NUM_TERMS = "5000";
-    private static final String DEFAULT_NUM_SAMPLE_TERMS = "100";
+    private static final String DEFAULT_NUM_SAMPLE_TERMS = "1000";
 
     private static final String USAGE_STRING_SHORT =
             "Usage: java [SystemProperties] -jar datagen.jar ";
